@@ -1,106 +1,263 @@
-Welcome to your new TanStack app! 
+# 🎫 TicketHub - Plataforma de Venda de Ingressos
 
-# Getting Started
+![TanStack Start](https://img.shields.io/badge/TanStack-Start-blue)
+![React](https://img.shields.io/badge/React-19.2.0-61dafb)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.7.2-3178c6)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.0.6-38bdf8)
 
-To run this application:
+## 📝 Sobre o Projeto
 
+**TicketHub** é uma plataforma moderna de venda de ingressos online, desenvolvida para oferecer aos usuários uma experiência rápida, segura e intuitiva na compra de ingressos para shows, festivais, teatros e eventos esportivos.
+
+Este projeto está atualmente em fase de desenvolvimento da interface (UI), com foco na criação de componentes reutilizáveis e uma experiência de usuário excepcional. A integração com a API será implementada em uma fase posterior.
+
+## 🚀 Tecnologias Utilizadas
+
+### Core
+- **[React.js 19.2.0](https://react.dev/)** - Biblioteca JavaScript para construção de interfaces
+- **[TanStack Start](https://tanstack.com/start)** - Framework full-stack para React com SSR
+- **[TanStack Router](https://tanstack.com/router)** - Roteamento type-safe com file-based routing
+- **[TanStack Query](https://tanstack.com/query)** - Gerenciamento de estado assíncrono
+- **[TypeScript 5.7.2](https://www.typescriptlang.org/)** - Tipagem estática para JavaScript
+
+### Estilização
+- **[Tailwind CSS 4.0.6](https://tailwindcss.com/)** - Framework CSS utility-first
+- **[shadcn/ui](https://ui.shadcn.com/)** - Biblioteca de componentes reutilizáveis
+- **[Lucide React](https://lucide.dev/)** - Biblioteca de ícones
+- **[class-variance-authority](https://cva.style/)** - Gerenciamento de variantes de componentes
+
+### Formulários e Validação
+- **[React Hook Form 7.71.1](https://react-hook-form.com/)** - Biblioteca para gerenciamento de formulários
+- **[Zod 4.3.6](https://zod.dev/)** - Validação de schemas TypeScript-first
+- **[@hookform/resolvers](https://github.com/react-hook-form/resolvers)** - Integração entre React Hook Form e Zod
+
+### Build e Desenvolvimento
+- **[Vite 7.1.7](https://vite.dev/)** - Build tool e dev server
+- **[Vitest 3.0.5](https://vitest.dev/)** - Framework de testes
+- **[Biome 2.2.4](https://biomejs.dev/)** - Linter e formatter
+
+## 🎯 Funcionalidades Implementadas
+
+### ✅ Landing Page
+- Hero section com headline atrativa e call-to-action
+- Seção de benefícios e funcionalidades da plataforma
+- Cards de features com animações e hover effects
+- Footer completo com links úteis
+- Design responsivo e moderno
+- Tema com paleta violet/purple para eventos
+
+### ✅ Autenticação (UI)
+- **Página de Login**
+  - Formulário com validação em tempo real
+  - Campos: email e senha
+  - Mensagens de erro personalizadas
+  - Link para recuperação de senha
+  - Navegação para cadastro
+
+- **Página de Cadastro**
+  - Formulário completo com validação
+  - Campos: nome, email, senha e confirmação de senha
+  - Validação de senha forte (maiúsculas, minúsculas e números)
+  - Verificação de confirmação de senha
+  - Termos de uso e política de privacidade
+
+### ✅ Componentes Reutilizáveis
+- Button (com variantes)
+- Input e Label
+- Card (Header, Content, Footer)
+- Form (integrado com React Hook Form)
+- Separator
+
+### ✅ Header Atualizado
+- Logo da plataforma (TicketHub)
+- Botões "Entrar" e "Cadastrar" no canto superior direito
+- Menu lateral responsivo com navegação
+- Tema consistente com a landing page
+
+## 📂 Estrutura do Projeto
+
+```
+vendas-ingresso-front/
+├── public/                      # Arquivos estáticos
+│   ├── manifest.json
+│   └── robots.txt
+├── src/
+│   ├── components/              # Componentes React
+│   │   ├── ui/                  # Componentes shadcn/ui
+│   │   │   ├── button.tsx
+│   │   │   ├── card.tsx
+│   │   │   ├── form.tsx
+│   │   │   ├── input.tsx
+│   │   │   ├── label.tsx
+│   │   │   └── separator.tsx
+│   │   └── Header.tsx           # Header com navegação
+│   ├── data/                    # Dados mockados/estáticos
+│   │   └── demo.punk-songs.ts
+│   ├── integrations/            # Integrações de terceiros
+│   │   └── tanstack-query/
+│   │       ├── devtools.tsx
+│   │       └── root-provider.tsx
+│   ├── lib/                     # Utilitários e helpers
+│   │   ├── schemas/             # Schemas de validação Zod
+│   │   │   └── auth.schema.ts   # Validação de login/cadastro
+│   │   └── utils.ts             # Função cn() para merge de classes
+│   ├── routes/                  # Rotas da aplicação (file-based)
+│   │   ├── __root.tsx           # Layout root
+│   │   ├── index.tsx            # Landing page
+│   │   ├── login.tsx            # Página de login
+│   │   ├── cadastro.tsx         # Página de cadastro
+│   │   └── demo/                # Rotas de demonstração
+│   ├── router.tsx               # Configuração do router
+│   ├── routeTree.gen.ts         # Tree de rotas (auto-gerado)
+│   └── styles.css               # Estilos globais + Tailwind
+├── biome.json                   # Configuração do Biome
+├── components.json              # Configuração do shadcn/ui
+├── package.json
+├── pnpm-lock.yaml
+├── tsconfig.json
+├── vite.config.ts
+└── README.md
+```
+
+## 🛠️ Como Rodar o Projeto Localmente
+
+### Pré-requisitos
+- **Node.js** 18+ instalado
+- **pnpm** instalado (ou npm/yarn)
+
+### Instalação
+
+1. Clone o repositório:
+```bash
+git clone <url-do-repositorio>
+cd vendas-ingresso-front
+```
+
+2. Instale as dependências:
 ```bash
 pnpm install
+```
+
+3. Inicie o servidor de desenvolvimento:
+```bash
 pnpm dev
 ```
 
-# Building For Production
-
-To build this application for production:
-
-```bash
-pnpm build
+4. Acesse a aplicação:
+```
+http://localhost:3000
 ```
 
-## Testing
+## 📦 Scripts Disponíveis
 
-This project uses [Vitest](https://vitest.dev/) for testing. You can run the tests with:
+```bash
+pnpm dev         # Inicia o servidor de desenvolvimento na porta 3000
+pnpm build       # Cria build de produção
+pnpm preview     # Preview do build de produção
+pnpm test        # Executa os testes com Vitest
+pnpm lint        # Executa o linter (Biome)
+pnpm format      # Formata o código (Biome)
+pnpm check       # Verifica código (lint + format)
+```
+
+## 🧪 Testes
+
+O projeto utiliza **[Vitest](https://vitest.dev/)** para testes:
 
 ```bash
 pnpm test
 ```
 
-## Styling
+## 🎨 Adicionando Componentes shadcn/ui
 
-This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
-
-
-## Linting & Formatting
-
-This project uses [Biome](https://biomejs.dev/) for linting and formatting. The following scripts are available:
-
+Para adicionar novos componentes do shadcn/ui:
 
 ```bash
-pnpm lint
-pnpm format
-pnpm check
+pnpm dlx shadcn@latest add <nome-do-componente>
 ```
 
-
-## Shadcn
-
-Add components using the latest version of [Shadcn](https://ui.shadcn.com/).
-
+Exemplo:
 ```bash
-pnpm dlx shadcn@latest add button
+pnpm dlx shadcn@latest add dialog
+pnpm dlx shadcn@latest add dropdown-menu
+pnpm dlx shadcn@latest add toast
 ```
 
+## 📐 Padrões de Código
 
+### Componentes
+- Use **PascalCase** para nomes de componentes
+- Crie componentes funcionais com TypeScript
+- Use props tipadas com interfaces/types
 
-## Routing
-This project uses [TanStack Router](https://tanstack.com/router). The initial setup is a file based router. Which means that the routes are managed as files in `src/routes`.
+### Rotas
+- Use **kebab-case** para arquivos de rotas
+- Utilize file-based routing do TanStack Router
+- Arquivos em `src/routes/` geram rotas automaticamente
 
-### Adding A Route
+### Formulários
+- Use **React Hook Form** com **Controller** para campos controlados
+- Valide com **Zod schemas** definidos em `src/lib/schemas/`
+- Utilize componentes do shadcn/ui (Input, Label, Form)
 
-To add a new route to your application just add another a new file in the `./src/routes` directory.
+### Estilização
+- Use **Tailwind CSS** utility classes
+- Utilize a função `cn()` de `@/lib/utils` para merge condicional de classes
+- Mantenha consistência com a paleta preto e branco do shadcn/ui
+- Aproveite as CSS variables do tema (background, foreground, primary, accent, etc.)
 
-TanStack will automatically generate the content of the route file for you.
+## 🔮 Próximas Etapas
 
-Now that you have two routes you can use a `Link` component to navigate between them.
+- [ ] Integração com API backend
+- [ ] Autenticação real com JWT/OAuth
+- [ ] Listagem de eventos disponíveis
+- [ ] Sistema de carrinho de compras
+- [ ] Página de checkout
+- [ ] Integração com gateway de pagamento
+- [ ] Painel do usuário (meus ingressos)
+- [ ] Sistema de QR Code para ingressos
+- [ ] Notificações por email
+- [ ] Modo escuro (dark mode)
+- [ ] Internacionalização (i18n)
+- [ ] Testes E2E com Playwright
 
-### Adding Links
+## ⚠️ Observações Importantes
 
-To use SPA (Single Page Application) navigation you will need to import the `Link` component from `@tanstack/react-router`.
+### API
+**A integração com a API será implementada posteriormente.** Atualmente, o projeto contém apenas a interface (UI) das páginas, com formulários funcionais mas sem conexão real com backend.
 
-```tsx
-import { Link } from "@tanstack/react-router";
-```
+Os formulários de login e cadastro simulam requisições com delays, mas não persistem dados ou autenticam usuários de fato.
 
-Then anywhere in your JSX you can use it like so:
+### Estrutura de Dados
+Quando a API for integrada, será necessário:
+- Configurar endpoints de autenticação
+- Implementar gerenciamento de tokens (localStorage/cookies)
+- Adicionar interceptors para requisições autenticadas
+- Implementar tratamento de erros da API
+- Adicionar estados de loading/error nas páginas
 
-```tsx
-<Link to="/about">About</Link>
-```
+## 🤝 Contribuindo
 
-This will create a link that will navigate to the `/about` route.
+1. Faça um fork do projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
 
-More information on the `Link` component can be found in the [Link documentation](https://tanstack.com/router/v1/docs/framework/react/api/router/linkComponent).
+## 📄 Licença
 
-### Using A Layout
+Este projeto está sob a licença MIT.
 
-In the File Based Routing setup the layout is located in `src/routes/__root.tsx`. Anything you add to the root route will appear in all the routes. The route content will appear in the JSX where you use the `<Outlet />` component.
+## 👨‍💻 Desenvolvido com
 
-Here is an example layout that includes a header:
+- ❤️ Paixão por criar experiências incríveis
+- ⚡ TanStack ecosystem
+- 🎨 Design moderno e responsivo
+- 🔒 Segurança e validação em mente
 
-```tsx
-import { Outlet, createRootRoute } from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
+---
 
-import { Link } from "@tanstack/react-router";
-
-export const Route = createRootRoute({
-  component: () => (
-    <>
-      <header>
-        <nav>
-          <Link to="/">Home</Link>
-          <Link to="/about">About</Link>
-        </nav>
+**TicketHub** - Transformando a forma como você compra ingressos! 🎫
       </header>
       <Outlet />
       <TanStackRouterDevtools />
