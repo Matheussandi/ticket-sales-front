@@ -11,3 +11,9 @@ count.txt
 .output
 .vinxi
 todos.json
+
+# Environment variables
+.env.local
+.env.*.local
+.env.production
+.env.development

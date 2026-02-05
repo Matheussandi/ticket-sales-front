@@ -13,7 +13,8 @@ import {
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { type LoginFormData, loginSchema } from '@/lib/schemas/auth.schema'
+import { useAuth } from '@/contexts/AuthContext'
+import { type LoginFormData, loginSchema } from '@/domain/entities/User'
 
 export const Route = createFileRoute('/login')({
   component: LoginPage,
@@ -21,11 +22,13 @@ export const Route = createFileRoute('/login')({
 
 function LoginPage() {
   const navigate = useNavigate()
+  const { login } = useAuth()
 
   const {
     control,
     handleSubmit,
     formState: { errors, isSubmitting },
+    setError,
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -35,14 +38,20 @@ function LoginPage() {
   })
 
   const onSubmit = async (data: LoginFormData) => {
-    // Simular delay de autenticação
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-
-    console.log('Login data:', data)
-
-    // Futuramente: integração com API
-    // Por enquanto, apenas redireciona para a home
-    navigate({ to: '/' })
+    try {
+      await login({
+        email: data.email,
+        password: data.password,
+      })
+      
+      // Login bem-sucedido, redireciona para home
+      navigate({ to: '/' })
+    } catch (error) {
+      // Exibe erro no formulário
+      setError('root', {
+        message: error instanceof Error ? error.message : 'Erro ao fazer login',
+      })
+    }
   }
 
   return (
@@ -66,6 +75,11 @@ function LoginPage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              {errors.root && (
+                <div className="rounded-md bg-destructive/15 p-3">
+                  <p className="text-sm text-destructive">{errors.root.message}</p>
+                </div>
+              )}
               <div className="space-y-2">
                 <Label htmlFor="email">
                   Email

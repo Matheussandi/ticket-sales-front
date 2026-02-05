@@ -13,7 +13,8 @@ import {
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { type RegisterFormData, registerSchema } from '@/lib/schemas/auth.schema'
+import { useAuth } from '@/contexts/AuthContext'
+import { type RegisterFormData, registerSchema } from '@/domain/entities/User'
 
 export const Route = createFileRoute('/cadastro')({
   component: CadastroPage,
@@ -21,11 +22,13 @@ export const Route = createFileRoute('/cadastro')({
 
 function CadastroPage() {
   const navigate = useNavigate()
+  const { register: registerUser } = useAuth()
 
   const {
     control,
     handleSubmit,
     formState: { errors, isSubmitting },
+    setError,
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -37,14 +40,21 @@ function CadastroPage() {
   })
 
   const onSubmit = async (data: RegisterFormData) => {
-    // Simular delay de cadastro
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-
-    console.log('Register data:', data)
-
-    // Futuramente: integração com API
-    // Por enquanto, apenas redireciona para o login
-    navigate({ to: '/login' })
+    try {
+      await registerUser({
+        name: data.name,
+        email: data.email,
+        password: data.password,
+      })
+      
+      // Registro bem-sucedido, redireciona para home
+      navigate({ to: '/' })
+    } catch (error) {
+      // Exibe erro no formulário
+      setError('root', {
+        message: error instanceof Error ? error.message : 'Erro ao criar conta',
+      })
+    }
   }
 
   return (
@@ -61,7 +71,13 @@ function CadastroPage() {
           </p>
         </div>
 
-        <Card>
+        <Card>{errors.root && (
+                <div className="rounded-md bg-destructive/15 p-3">
+                  <p className="text-sm text-destructive">{errors.root.message}</p>
+                </div>
+              )}
+
+              
           <CardHeader>
             <CardTitle className="text-2xl">Cadastro</CardTitle>
             <CardDescription>

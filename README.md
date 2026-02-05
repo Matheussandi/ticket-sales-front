@@ -4,12 +4,49 @@
 ![React](https://img.shields.io/badge/React-19.2.0-61dafb)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.7.2-3178c6)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.0.6-38bdf8)
+![Clean Architecture](https://img.shields.io/badge/Architecture-Clean-green)
 
 ## 📝 Sobre o Projeto
 
-**TicketHub** é uma plataforma moderna de venda de ingressos online, desenvolvida para oferecer aos usuários uma experiência rápida, segura e intuitiva na compra de ingressos para shows, festivais, teatros e eventos esportivos.
+**TicketHub** é uma plataforma moderna de venda de ingressos online, desenvolvida com **Clean Architecture** para oferecer aos usuários uma experiência rápida, segura e intuitiva na compra de ingressos para shows, festivais, teatros e eventos esportivos.
 
-Este projeto está atualmente em fase de desenvolvimento da interface (UI), com foco na criação de componentes reutilizáveis e uma experiência de usuário excepcional. A integração com a API será implementada em uma fase posterior.
+### ⚡ Status do Projeto
+
+- ✅ **Arquitetura Clean** implementada (Domain, Data, Presentation, Infrastructure)
+- ✅ **Sistema de autenticação** completo (UI + integração pronta para API)
+- ✅ **Landing page** responsiva e moderna
+- ⏳ **Integração com API** (aguardando backend)
+- ⏳ **Módulos de Events, Tickets, Payments** (próximas features)
+
+## 🏗️ Arquitetura
+
+Este projeto segue os princípios da **Clean Architecture**, garantindo:
+
+- **Separação de responsabilidades** - Cada camada tem uma função clara
+- **Independência de frameworks** - Regras de negócio isoladas
+- **Testabilidade** - Código facilmente testável
+- **Escalabilidade** - Fácil adicionar novas features
+- **Manutenibilidade** - Código organizado e legível
+
+### Estrutura de Camadas
+
+```
+src/
+├── domain/          # Regras de negócio puras
+│   ├── entities/    # User, Event, Ticket
+│   ├── repositories/  # Interfaces (IAuthRepository)
+│   └── services/    # Lógica de negócio (AuthService)
+├── data/            # Implementações
+│   ├── http/        # HttpClient (axios)
+│   ├── repositories/  # AuthRepositoryImpl
+│   ├── storage/     # TokenStorage
+│   └── di/          # Dependency Injection
+├── contexts/        # Estado global (AuthContext)
+├── routes/          # Páginas (TanStack Router)
+└── components/      # Componentes UI
+```
+
+📚 **[Documentação Completa da Arquitetura →](./docs/)**
 
 ## 🚀 Tecnologias Utilizadas
 
@@ -31,10 +68,14 @@ Este projeto está atualmente em fase de desenvolvimento da interface (UI), com 
 - **[Zod 4.3.6](https://zod.dev/)** - Validação de schemas TypeScript-first
 - **[@hookform/resolvers](https://github.com/react-hook-form/resolvers)** - Integração entre React Hook Form e Zod
 
+### HTTP e Estado
+- **[Axios](https://axios-http.com/)** - Cliente HTTP com interceptors
+- **[Context API](https://react.dev/reference/react/createContext)** - Gerenciamento de estado global
+
 ### Build e Desenvolvimento
 - **[Vite 7.1.7](https://vite.dev/)** - Build tool e dev server
 - **[Vitest 3.0.5](https://vitest.dev/)** - Framework de testes
-- **[Biome 2.2.4](https://biomejs.dev/)** - Linter e formatter
+- **[Biome 2.2.4](https://biomejs.dev/)** - Linter e formatter (substitui ESLint + Prettier)
 
 ## 🎯 Funcionalidades Implementadas
 
@@ -44,9 +85,9 @@ Este projeto está atualmente em fase de desenvolvimento da interface (UI), com 
 - Cards de features com animações e hover effects
 - Footer completo com links úteis
 - Design responsivo e moderno
-- Tema com paleta violet/purple para eventos
+- Tema monocromático (black & white)
 
-### ✅ Autenticação (UI)
+### ✅ Sistema de Autenticação
 - **Página de Login**
   - Formulário com validação em tempo real
   - Campos: email e senha
