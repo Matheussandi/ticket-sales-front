@@ -6,7 +6,7 @@ import {
   Scripts,
 } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
-import Header from '../components/Header'
+import { Toaster } from '../components/ui/sonner'
 import { AuthProvider } from '../contexts/AuthContext'
 import { authService } from '../data/di/container'
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
@@ -43,14 +43,14 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="pt-BR">
       <head>
         <HeadContent />
       </head>
       <body>
         <AuthProvider authService={authService}>
-          <Header />
           {children}
+          <Toaster />
           <TanStackDevtools
             config={{
               position: 'bottom-right',

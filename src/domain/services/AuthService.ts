@@ -1,4 +1,10 @@
-import type { AuthResponse, LoginCredentials, RegisterData } from "../entities/User";
+import type { 
+	AuthResponse, 
+	LoginCredentials, 
+	RegisterCustomerData, 
+	RegisterData,
+	RegisterPartnerData
+} from "../entities/User";
 import type { IAuthRepository } from "../repositories/IAuthRepository";
 
 /**
@@ -30,6 +36,28 @@ export class AuthService {
 		} catch (error) {
 			throw new Error(
 				error instanceof Error ? error.message : "Erro ao registrar usuário",
+			);
+		}
+	}
+
+	async registerPartner(data: RegisterPartnerData): Promise<AuthResponse> {
+		try {
+			const response = await this.authRepository.registerPartner(data);
+			return response;
+		} catch (error) {
+			throw new Error(
+				error instanceof Error ? error.message : "Erro ao registrar parceiro",
+			);
+		}
+	}
+
+	async registerCustomer(data: RegisterCustomerData): Promise<AuthResponse> {
+		try {
+			const response = await this.authRepository.registerCustomer(data);
+			return response;
+		} catch (error) {
+			throw new Error(
+				error instanceof Error ? error.message : "Erro ao registrar cliente",
 			);
 		}
 	}
