@@ -1,203 +1,52 @@
-# Quick Start Guide - TicketHub
+# Quick Start
 
-## 🚀 Início Rápido
-
-Guia para desenvolvedores que estão começando no projeto.
-
----
-
-## 📋 Pré-requisitos
-
-- **Node.js** 18+ (recomendado: 20+)
-- **pnpm** 8+ (`npm install -g pnpm`)
-- **Git**
-
----
-
-## ⚙️ Setup Inicial
-
-### 1. Clonar e Instalar
+## Setup
 
 ```bash
-# Clonar repositório
-git clone <url-do-repo>
-cd vendas-ingresso-front
-
-# Instalar dependências
 pnpm install
-```
-
-### 2. Configurar Variáveis de Ambiente
-
-```bash
-# Copiar template
 cp .env.example .env.development
-
-# Editar conforme necessário
-nano .env.development
+# Editar VITE_API_BASE_URL=http://localhost:3001
+pnpm dev  # http://localhost:3000
 ```
 
-**Variáveis importantes:**
-```bash
-VITE_API_BASE_URL=http://localhost:3001
-VITE_API_TIMEOUT=30000
-```
-
-### 3. Rodar em Desenvolvimento
-
-```bash
-pnpm dev
-```
-
-Acesse: **http://localhost:3000**
-
----
-
-## 🗂️ Estrutura Rápida
-
-```
-src/
-├── domain/           # Regras de negócio (entities, services)
-├── data/             # Implementações (HTTP, repositories)
-├── contexts/         # Estado global (AuthContext)
-├── routes/           # Páginas
-└── components/       # Componentes UI
-```
-
----
-
-## 🧭 Navegação no Código
-
-### Como Fazer Login?
-
-1. Ir para `/login`
-2. Código em: `src/routes/login.tsx`
-3. Usa: `useAuth()` hook
-4. Hook definido em: `src/contexts/AuthContext.tsx`
-5. Chama: `authService.login()` de `src/data/di/container.ts`
-
-### Como Adicionar Nova Rota?
-
-```bash
-# Criar arquivo
-touch src/routes/minha-rota.tsx
-```
-
-```typescript
-import { createFileRoute } from '@tanstack/react-router';
-
-export const Route = createFileRoute('/minha-rota')({
-  component: MinhaRotaPage
-});
-
-function MinhaRotaPage() {
-  return <div>Minha Rota</div>;
-}
-```
-
-Acesse: `http://localhost:3000/minha-rota`
-
-### Como Usar Autenticação em Componente?
+## Usar Autenticação
 
 ```typescript
 import { useAuth } from '@/contexts/AuthContext';
 
-function MeuComponente() {
+function Component() {
   const { user, isAuthenticated, logout } = useAuth();
-
-  if (!isAuthenticated) {
-    return <div>Não autenticado</div>;
-  }
-
-  return (
-    <div>
-      <p>Bem-vindo, {user?.name}!</p>
-      <button onClick={logout}>Sair</button>
-    </div>
-  );
+  // user: { id, name, email } | null
 }
 ```
 
-### Como Criar Rota Protegida?
+## Criar Rota
+
+```typescript
+// src/routes/example.tsx
+import { createFileRoute } from '@tanstack/react-router';
+
+export const Route = createFileRoute('/example')({
+  component: () => <div>Hello</div>
+});
+```
+
+## Rota Protegida
 
 ```typescript
 import { useRequireAuth } from '@/contexts/AuthContext';
 
-function DashboardPage() {
-  const { user } = useRequireAuth(); // Redireciona se não autenticado
-
-  return <div>Dashboard de {user.name}</div>;
+function ProtectedPage() {
+  const { user } = useRequireAuth(); // Auto-redirect se não autenticado
+  return <div>{user.name}</div>;
 }
 ```
 
----
-
-## 🛠️ Comandos Úteis
+## Adicionar Componente shadcn/ui
 
 ```bash
-# Desenvolvimento
-pnpm dev              # Rodar em modo dev (porta 3000)
-
-# Build
-pnpm build            # Build para produção
-
-# Code Quality
-pnpm lint             # Rodar linter (Biome)
-pnpm format           # Formatar código (Biome)
-pnpm check            # Lint + Format
-
-# Adicionar Componente shadcn/ui
-pnpm dlx shadcn@latest add <component>
-# Exemplo: pnpm dlx shadcn@latest add dialog
+pnpm dlx shadcn@latest add dialog
 ```
-
----
-
-## 🎨 Estilos (Tailwind CSS)
-
-### Classes Utilitárias
-
-```tsx
-<div className="flex items-center justify-between p-4 bg-background">
-  <h1 className="text-2xl font-bold text-foreground">Título</h1>
-  <button className="px-4 py-2 bg-primary text-primary-foreground rounded-md">
-    Botão
-  </button>
-</div>
-```
-
-### Cores do Tema
-
-Use classes semânticas (não cores diretas):
-
-```tsx
-// ✅ Bom
-<div className="bg-background text-foreground">...</div>
-<button className="bg-primary text-primary-foreground">...</button>
-
-// ❌ Evite
-<div className="bg-white text-black">...</div>
-<button className="bg-blue-500 text-white">...</button>
-```
-
-### Componentes shadcn/ui
-
-```tsx
-import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-
-function Example() {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Título</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Button>Clique aqui</Button>
-      </CardContent>
-    </Card>
-  );
-}
 ```
 
 ---

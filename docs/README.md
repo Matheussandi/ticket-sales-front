@@ -1,203 +1,50 @@
-# TicketHub - Documentação
+# TicketHub - Sistema de Vendas de Ingressos
 
-Documentação completa da arquitetura Clean Architecture do TicketHub.
+## Arquitetura
 
-## 📚 Índice de Documentos
+Projeto React com Clean Architecture, separando domínio, dados e apresentação.
 
-### 1. [Quick Start](./QUICK_START.md)
-Guia rápido para começar a desenvolver.
-- Setup inicial
-- Comandos úteis
-- Exemplos práticos
-- Problemas comuns
+## Stack
+- React 19 + TanStack Start + TanStack Router (file-based)
+- TypeScript 5.7
+- Tailwind CSS 4 + shadcn/ui
+- Context API + TanStack Query
+- React Hook Form + Zod
+- Axios
+- Biome.js
 
-### 2. [Clean Architecture](./CLEAN_ARCHITECTURE.md)
-Documentação completa da arquitetura.
-- Visão geral dos princípios
-- Estrutura de camadas (Domain, Data, Presentation, Infrastructure)
-- Fluxo de dados
-- Guia de implementação
-- Boas práticas
-- Exemplos de uso
-
-### 3. [API Integration](./API_INTEGRATION.md)
-Guia de integração com backend.
-- Endpoints esperados
-- Formato de requests/responses
-- Autenticação JWT
-- Mock server para desenvolvimento
-- Tratamento de erros
-- Debugging
-
-### 4. [Folder Structure](./FOLDER_STRUCTURE.md)
-Estrutura completa de pastas e arquivos.
-- Árvore de diretórios
-- Descrição de cada pasta
-- Fluxo de arquivos
-- Hierarquia de dependências
-- Checklist de manutenção
-
----
-
-## 🎯 Por onde começar?
-
-### Novo no projeto?
-👉 Comece pelo [Quick Start](./QUICK_START.md)
-
-### Quer entender a arquitetura?
-👉 Leia [Clean Architecture](./CLEAN_ARCHITECTURE.md)
-
-### Vai integrar com API?
-👉 Veja [API Integration](./API_INTEGRATION.md)
-
-### Procurando onde fica um arquivo?
-👉 Consulte [Folder Structure](./FOLDER_STRUCTURE.md)
-
----
-
-## 🏗️ Arquitetura Resumida
-
-```
-┌─────────────────────────────────────┐
-│         UI / Routes                 │  ← Páginas e componentes
-├─────────────────────────────────────┤
-│         Contexts (State)            │  ← Estado global (Context API)
-├─────────────────────────────────────┤
-│    Domain Services (Business)       │  ← Lógica de negócio
-├─────────────────────────────────────┤
-│   Domain Repositories (Contracts)   │  ← Interfaces
-├─────────────────────────────────────┤
-│   Data Repositories (Implementation)│  ← Implementações
-├─────────────────────────────────────┤
-│  Infrastructure (HTTP, Storage)     │  ← Axios, localStorage
-└─────────────────────────────────────┘
-```
-
-**Regra de Ouro:** Dependências apontam sempre para baixo (ou para contratos).
-
----
-
-## 🔑 Conceitos-Chave
-
-### Entities
-Modelos de dados + validação (Zod schemas).
-
-**Exemplo:** `User`, `Event`, `Ticket`
-
-### Repositories
-Contratos (interfaces) para acesso a dados.
-
-**Exemplo:** `IAuthRepository`
-
-### Services
-Lógica de negócio que orquestra repositories.
-
-**Exemplo:** `AuthService`
-
-### Contexts
-Gerenciamento de estado global (React Context API).
-
-**Exemplo:** `AuthContext`
-
-### Dependency Injection
-Container que cria e injeta dependências.
-
-**Exemplo:** `container.ts` → `authService`
-
----
-
-## 📦 Estrutura de Pastas
+## Estrutura
 
 ```
 src/
-├── domain/          # Regras de negócio puras
-│   ├── entities/
-│   ├── repositories/
-│   └── services/
-├── data/            # Implementações de acesso a dados
-│   ├── http/
-│   ├── repositories/
-│   ├── storage/
-│   └── di/
-├── contexts/        # Estado global (Context API)
-├── routes/          # Páginas (TanStack Router)
-├── components/      # Componentes UI
-└── config/          # Configurações (env vars)
+├── domain/              # Regras de negócio
+│   ├── entities/        # User.ts (types + Zod schemas)
+│   ├── repositories/    # IAuthRepository.ts (interfaces)
+│   └── services/        # AuthService.ts (lógica de negócio)
+├── data/                # Implementações
+│   ├── http/            # HttpClient.ts (axios wrapper)
+│   ├── repositories/    # AuthRepositoryImpl.ts
+│   ├── storage/         # TokenStorage.ts (localStorage)
+│   └── di/              # container.ts (dependency injection)
+├── contexts/            # AuthContext.tsx (estado global)
+├── routes/              # Páginas (TanStack Router file-based)
+├── components/          # Componentes UI (shadcn/ui)
+└── config/              # env.ts
 ```
 
----
+## Fluxo de Login
 
-## 🚀 Comandos Essenciais
+```
+login.tsx → useAuth() → authService.login() → authRepository.login() → httpClient.post() → API
+```
+
+## Comandos
 
 ```bash
-# Desenvolvimento
-pnpm dev              # Rodar servidor dev (porta 3000)
-
-# Build
-pnpm build            # Build para produção
-
-# Code Quality
-pnpm lint             # Rodar linter
-pnpm format           # Formatar código
-pnpm check            # Lint + Format
-
-# Componentes
-pnpm dlx shadcn@latest add <component>
+pnpm dev      # Desenvolvimento (porta 3000)
+pnpm build    # Build produção
+pnpm check    # Lint + Format
 ```
-
----
-
-## 🔄 Fluxo Típico
-
-### Login de Usuário
-
-```
-User Input (login.tsx)
-    ↓
-useAuth() hook (AuthContext)
-    ↓
-authService.login() (AuthService)
-    ↓
-authRepository.login() (IAuthRepository)
-    ↓
-httpClient.post() (HttpClient)
-    ↓
-API Request
-```
-
----
-
-## 🛠️ Tecnologias
-
-| Categoria | Tecnologia |
-|-----------|------------|
-| Framework | React 19 + TanStack Start |
-| Routing | TanStack Router (file-based) |
-| State | Context API + TanStack Query |
-| Styling | Tailwind CSS 4 + shadcn/ui |
-| Forms | React Hook Form + Zod |
-| HTTP | Axios |
-| Language | TypeScript 5.7 |
-| Linter/Formatter | Biome.js |
-
----
-
-## 📋 Checklist de Nova Feature
-
-- [ ] 1. Criar entity em `domain/entities/`
-- [ ] 2. Criar interface em `domain/repositories/`
-- [ ] 3. Criar service em `domain/services/`
-- [ ] 4. Implementar repository em `data/repositories/`
-- [ ] 5. Registrar no `data/di/container.ts`
-- [ ] 6. Criar context em `contexts/` (opcional)
-- [ ] 7. Criar rota em `routes/`
-- [ ] 8. Testar integração
-
----
-
-## 🎓 Recursos Adicionais
-
-### Documentação Externa
 
 - [TanStack Router](https://tanstack.com/router/latest)
 - [TanStack Query](https://tanstack.com/query/latest)
