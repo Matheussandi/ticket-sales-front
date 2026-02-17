@@ -111,7 +111,7 @@ function LoginPage() {
                     Senha
                   </Label>
                   <a
-                    href="#"
+                    href="/esqueci-senha"
                     className="text-sm hover:underline transition-colors"
                   >
                     Esqueceu a senha?
