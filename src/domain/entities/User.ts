@@ -1,10 +1,12 @@
 import { z } from "zod";
 
+export const userRoleEnum = z.enum(["partner", "customer"]);
+
 export const userSchema = z.object({
 	id: z.string(),
 	name: z.string(),
 	email: z.string(),
-	userType: z.enum(["partner", "customer"]),
+	role: userRoleEnum.optional(),
 	company_name: z.string().optional(),
 	address: z.string().optional(),
 	phone: z.string().optional(),

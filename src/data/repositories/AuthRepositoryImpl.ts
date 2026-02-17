@@ -7,6 +7,7 @@ import type {
 	User,
 } from "../../domain/entities/User";
 import type { IAuthRepository } from "../../domain/repositories/IAuthRepository";
+import { extractRoleFromToken } from "../../domain/utils/jwtDecoder";
 import type { HttpClient } from "../http/HttpClient";
 import type { TokenStorage } from "../storage/TokenStorage";
 
@@ -28,11 +29,21 @@ export class AuthRepositoryImpl implements IAuthRepository {
 			credentials,
 		);
 
+		const role = extractRoleFromToken(response.token);
+
+		const userWithRole: User = {
+			...response.user,
+			role,
+		};
+
 		this.tokenStorage.saveToken(response.token);
-		this.tokenStorage.saveUser(response.user);
+		this.tokenStorage.saveUser(userWithRole);
 		this.httpClient.setToken(response.token);
 
-		return response;
+		return {
+			...response,
+			user: userWithRole,
+		};
 	}
 
 	async register(data: RegisterData): Promise<AuthResponse> {
@@ -41,15 +52,24 @@ export class AuthRepositoryImpl implements IAuthRepository {
 			data,
 		);
 
+		const role = extractRoleFromToken(response.token);
+
+		const userWithRole: User = {
+			...response.user,
+			role,
+		};
+
 		this.tokenStorage.saveToken(response.token);
-		this.tokenStorage.saveUser(response.user);
+		this.tokenStorage.saveUser(userWithRole);
 		this.httpClient.setToken(response.token);
 
-		return response;
+		return {
+			...response,
+			user: userWithRole,
+		};
 	}
 
 	async registerPartner(data: RegisterPartnerData): Promise<AuthResponse> {
-		// API response structure for partner registration
 		interface PartnerRegisterResponse {
 			id: number;
 			name: string;
@@ -68,7 +88,7 @@ export class AuthRepositoryImpl implements IAuthRepository {
 			id: response.user_id.toString(),
 			name: response.name,
 			email: data.email,
-			userType: "partner",
+			role: "partner",
 			company_name: response.company_name,
 			createdAt: new Date(response.created_at),
 		};
@@ -106,7 +126,7 @@ export class AuthRepositoryImpl implements IAuthRepository {
 			id: response.user_id.toString(),
 			name: response.name,
 			email: data.email,
-			userType: "customer",
+			role: "customer",
 			address: response.address,
 			phone: response.phone,
 			createdAt: new Date(response.created_at),

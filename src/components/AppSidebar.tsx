@@ -1,5 +1,5 @@
 import { Link, useMatchRoute } from "@tanstack/react-router";
-import { Calendar, Home, LogOut, User } from "lucide-react";
+import { Calendar, Home, LogOut, Ticket, User } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -16,28 +16,54 @@ import {
 	SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/AuthContext";
+import { useRole } from "@/hooks/useRole";
 
-const menuItems = [
-	{
-		title: "Dashboard",
-		url: "/dashboard",
-		icon: Home,
-	},
-	{
-		title: "Eventos",
-		url: "/events",
-		icon: Calendar,
-	},
-	{
-		title: "Perfil",
-		url: "/profile",
-		icon: User,
-	},
-];
+const menuItemsByRole = {
+	partner: [
+		{
+			title: "Dashboard",
+			url: "/dashboard",
+			icon: Home,
+		},
+		{
+			title: "Eventos",
+			url: "/events",
+			icon: Calendar,
+		},
+		{
+			title: "Perfil",
+			url: "/profile",
+			icon: User,
+		},
+	],
+	customer: [
+		{
+			title: "Eventos",
+			url: "/events",
+			icon: Calendar,
+		},
+		{
+			title: "Meus Ingressos",
+			url: "/tickets",
+			icon: Ticket,
+		},
+		{
+			title: "Perfil",
+			url: "/profile",
+			icon: User,
+		},
+	],
+};
 
+/**
+ * AppSidebar - Renderiza a sidebar com itens filtrados por role
+ */
 export function AppSidebar() {
 	const { user, logout } = useAuth();
 	const matchRoute = useMatchRoute();
+	const role = useRole();
+
+	const menuItems = menuItemsByRole[role];
 
 	const handleLogout = async () => {
 		try {
