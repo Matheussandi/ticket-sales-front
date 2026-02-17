@@ -110,12 +110,12 @@ function LoginPage() {
                   <Label htmlFor="password">
                     Senha
                   </Label>
-                  <a
-                    href="/esqueci-senha"
+                  <Link
+                    to="/esqueci-senha"
                     className="text-sm hover:underline transition-colors"
                   >
                     Esqueceu a senha?
-                  </a>
+                  </Link>
                 </div>
                 <Controller
                   name="password"

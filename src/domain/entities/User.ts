@@ -99,6 +99,13 @@ export const registerCustomerSchema = registerCustomerRequestSchema
 		path: ["confirmPassword"],
 	});
 
+export const forgotPasswordSchema = z.object({
+	email: z
+		.string()
+		.min(1, "Email é obrigatório")
+		
+});
+
 export type User = z.infer<typeof userSchema>;
 export type LoginRequest = z.infer<typeof loginRequestSchema>;
 export type RegisterRequest = z.infer<typeof registerRequestSchema>;
@@ -109,6 +116,7 @@ export type LoginFormData = z.infer<typeof loginSchema>;
 export type RegisterFormData = z.infer<typeof registerSchema>;
 export type RegisterPartnerFormData = z.infer<typeof registerPartnerSchema>;
 export type RegisterCustomerFormData = z.infer<typeof registerCustomerSchema>;
+export type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 export type LoginCredentials = LoginRequest;
 export type RegisterData = RegisterRequest;
 export type RegisterPartnerData = RegisterPartnerRequest;
