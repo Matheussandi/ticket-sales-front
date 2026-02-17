@@ -135,7 +135,7 @@ function App() {
               className="bg-card hover:bg-accent/50 transition-all duration-300 hover:shadow-lg group"
             >
               <CardContent className="p-6">
-                <div className="mb-4 group-hover:scale-110 transition-transform duration-300">
+                <div className="mb-4 transition-transform duration-300">
                   {feature.icon}
                 </div>
                 <h3 className="text-xl font-semibold mb-3">
@@ -169,7 +169,7 @@ function App() {
                     Criar Conta Grátis
                   </Link>
                 </Button>
-                <Button asChild size="lg" variant="outline" className="text-lg px-8">
+                <Button asChild size="lg" variant="secondary" className="text-lg px-8">
                   <Link to="/login">
                     Já tenho conta
                   </Link>
