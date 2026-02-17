@@ -6,7 +6,13 @@ import {
 	useState,
 } from "react";
 import { tokenStorage } from "../data/di/container";
-import type { LoginCredentials, RegisterData, User } from "../domain/entities/User";
+import type { 
+	LoginCredentials, 
+	RegisterCustomerData,
+	RegisterData, 
+	RegisterPartnerData,
+	User 
+} from "../domain/entities/User";
 import type { AuthService } from "../domain/services/AuthService";
 
 /**
@@ -18,6 +24,8 @@ interface AuthContextData {
 	isLoading: boolean;
 	login: (credentials: LoginCredentials) => Promise<void>;
 	register: (data: RegisterData) => Promise<void>;
+	registerPartner: (data: RegisterPartnerData) => Promise<void>;
+	registerCustomer: (data: RegisterCustomerData) => Promise<void>;
 	logout: () => Promise<void>;
 }
 
@@ -98,6 +106,44 @@ export function AuthProvider({ children, authService }: AuthProviderProps) {
 	};
 
 	/**
+	 * Registra novo parceiro
+	 */
+	const registerPartner = async (data: RegisterPartnerData): Promise<void> => {
+		setIsLoading(true);
+		try {
+			const response = await authService.registerPartner(data);
+			// After successful registration, perform login
+			if (response.token) {
+				setUser(response.user);
+			} else {
+				// If no token returned, perform login
+				await login({ email: data.email, password: data.password });
+			}
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
+	/**
+	 * Registra novo cliente
+	 */
+	const registerCustomer = async (data: RegisterCustomerData): Promise<void> => {
+		setIsLoading(true);
+		try {
+			const response = await authService.registerCustomer(data);
+			// After successful registration, perform login
+			if (response.token) {
+				setUser(response.user);
+			} else {
+				// If no token returned, perform login
+				await login({ email: data.email, password: data.password });
+			}
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
+	/**
 	 * Faz logout
 	 */
 	const logout = async (): Promise<void> => {
@@ -116,6 +162,8 @@ export function AuthProvider({ children, authService }: AuthProviderProps) {
 		isLoading,
 		login,
 		register,
+		registerPartner,
+		registerCustomer,
 		logout,
 	};
 

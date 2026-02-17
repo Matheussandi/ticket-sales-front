@@ -1,203 +1,56 @@
-# TicketHub - Clean Architecture Documentation
+# Clean Architecture
 
-## 📋 Índice
+## Camadas
 
-1. [Visão Geral](#visão-geral)
-2. [Estrutura do Projeto](#estrutura-do-projeto)
-3. [Camadas da Arquitetura](#camadas-da-arquitetura)
-4. [Fluxo de Dados](#fluxo-de-dados)
-5. [Guia de Implementação](#guia-de-implementação)
-6. [Variáveis de Ambiente](#variáveis-de-ambiente)
-7. [Boas Práticas](#boas-práticas)
-8. [Exemplos de Uso](#exemplos-de-uso)
+### Domain (Regras de Negócio)
+**Pasta:** `src/domain/`
 
----
+- **entities/** - Schemas Zod + tipos derivados
+  - `User.ts`: 
+    - Schemas: userSchema, loginRequestSchema, registerRequestSchema, authResponseSchema
+    - Types derivados: User, LoginRequest, RegisterRequest, AuthResponse
+    - Padrão: schema primeiro, depois `type X = z.infer<typeof schema>`
+- **repositories/** - Interfaces (contratos)
+  - `IAuthRepository.ts`: interface com métodos login(), register(), logout()
+- **services/** - Lógica de negócio
+  - `AuthService.ts`: recebe IAuthRepository via construtor, orquestra lógica
 
-## 🎯 Visão Geral
+### Data (Implementações)
+**Pasta:** `src/data/`
 
-O **TicketHub** foi estruturado seguindo os princípios da **Clean Architecture**, garantindo:
+- **http/** - Cliente HTTP
+  - `HttpClient.ts`: wrapper axios, interceptors (adiciona token), métodos get/post/put/delete
+- **repositories/** - Implementação das interfaces
+  - `AuthRepositoryImpl.ts`: implementa IAuthRepository, usa HttpClient e TokenStorage
+- **storage/** - Persistência local
+  - `TokenStorage.ts`: wrapper localStorage, métodos saveToken/getToken/removeToken
+- **di/** - Dependency Injection
+  - `container.ts`: cria instâncias (httpClient → authRepository → authService)
 
-- **Separação de responsabilidades** clara entre camadas
-- **Independência de frameworks** - regras de negócio isoladas
-- **Testabilidade** - cada camada pode ser testada isoladamente
-- **Escalabilidade** - fácil adicionar novas features
-- **Manutenibilidade** - código organizado e legível
+### Contexts (Estado Global)
+**Pasta:** `src/contexts/`
 
-### Princípios Aplicados
+- `AuthContext.tsx`: Provider + hooks (useAuth, useRequireAuth), recebe authService via props
 
-1. **Dependency Inversion Principle (DIP)** - Camadas internas não conhecem camadas externas
-2. **Single Responsibility Principle (SRP)** - Cada módulo tem uma única responsabilidade
-3. **Dependency Injection** - Dependências injetadas via container
-4. **Interface Segregation** - Contratos bem definidos entre camadas
-
----
-
-## 🏗️ Estrutura do Projeto
+## Fluxo
 
 ```
-src/
-├── domain/                      # Camada de Domínio (Regras de Negócio)
-│   ├── entities/
-│   │   └── User.ts              # Entidades + Schemas de validação
-│   ├── repositories/
-│   │   └── IAuthRepository.ts   # Contratos (Interfaces)
-│   └── services/
-│       └── AuthService.ts       # Lógica de negócio
-│
-├── data/                        # Camada de Dados (Implementações)
-│   ├── http/
-│   │   └── HttpClient.ts        # Cliente HTTP (Axios wrapper)
-│   ├── repositories/
-│   │   └── AuthRepositoryImpl.ts # Implementação dos repositórios
-│   ├── storage/
-│   │   └── TokenStorage.ts      # Gerenciamento de localStorage
-│   └── di/
-│       └── container.ts         # Dependency Injection Container
-│
-├── contexts/                    # Camada de Apresentação (Estado)
-│   └── AuthContext.tsx          # Context API + Hooks
-│
-├── config/                      # Configurações
-│   └── env.ts                   # Variáveis de ambiente tipadas
-│
-├── components/                  # Componentes UI
-│   ├── Header.tsx
-│   └── ui/                      # shadcn/ui components
-│
-├── routes/                      # Rotas (TanStack Router)
-│   ├── __root.tsx               # Layout raiz com providers
-│   ├── index.tsx                # Landing page
-│   ├── login.tsx                # Página de login
-│   └── cadastro.tsx             # Página de cadastro
-│
-└── lib/                         # Utilitários
-    └── utils.ts                 # Helpers (cn, etc.)
+login.tsx → useAuth() → authService.login() → authRepository.login() → httpClient.post() → API
 ```
 
----
+## Regra
 
-## 🔷 Camadas da Arquitetura
+Dependências apontam sempre para dentro (Domain). Camadas externas dependem de interfaces, não de implementações.
 
-### 1️⃣ Domain Layer (Camada de Domínio)
+## Adicionar Feature
 
-**Responsabilidade:** Regras de negócio puras, sem dependências externas.
-
-#### 📂 `domain/entities/`
-
-Definem os modelos de dados e schemas de validação.
-
-**Exemplo: `User.ts`**
-
-```typescript
-// Entidades (tipos puros)
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  createdAt?: Date;
-}
-
-// Schemas Zod (validação)
-export const loginSchema = z.object({
-  email: z.string().email("Email inválido"),
-  password: z.string().min(8, "Mínimo 8 caracteres")
-});
-```
-
-**Conceitos:**
-- Entidades representam objetos de negócio
-- Schemas Zod ficam aqui pois validam dados do domínio
-- Sem dependências de frameworks (exceto Zod para validação)
-
----
-
-#### 📂 `domain/repositories/`
-
-Interfaces que definem **contratos** para acesso a dados.
-
-**Exemplo: `IAuthRepository.ts`**
-
-```typescript
-export interface IAuthRepository {
-  login(credentials: LoginCredentials): Promise<AuthResponse>;
-  register(data: RegisterData): Promise<AuthResponse>;
-  logout(): Promise<void>;
-  validateToken(): Promise<boolean>;
-}
-```
-
-**Conceitos:**
-- Define **O QUE** fazer, não **COMO** fazer
-- Implementações ficam na camada de dados
-- Permite trocar implementação sem afetar o domínio
-
----
-
-#### 📂 `domain/services/`
-
-Orquestram lógica de negócio usando repositories.
-
-**Exemplo: `AuthService.ts`**
-
-```typescript
-export class AuthService {
-  constructor(private authRepository: IAuthRepository) {}
-
-  async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    // Lógica de negócio adicional (logs, analytics, etc.)
-    try {
-      return await this.authRepository.login(credentials);
-    } catch (error) {
-      // Tratamento de erro customizado
-      throw new Error("Erro ao fazer login");
-    }
-  }
-}
-```
-
-**Conceitos:**
-- Adiciona lógica além do simples CRUD
-- Coordena múltiplos repositories se necessário
-- Independente de frameworks HTTP/UI
-
----
-
-### 2️⃣ Data Layer (Camada de Dados)
-
-**Responsabilidade:** Implementações concretas de acesso a dados.
-
-#### 📂 `data/http/`
-
-Cliente HTTP centralizado com configurações globais.
-
-**Exemplo: `HttpClient.ts`**
-
-```typescript
-export class HttpClient {
-  private axiosInstance: AxiosInstance;
-
-  constructor() {
-    this.axiosInstance = axios.create({
-      baseURL: env.apiBaseUrl,
-      timeout: env.apiTimeout,
-    });
-    this.setupInterceptors();
-  }
-
-  // Interceptors adicionam token automaticamente
-  private setupInterceptors() {
-    this.axiosInstance.interceptors.request.use((config) => {
-      const token = localStorage.getItem("@tickethub:token");
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-      return config;
-    });
-  }
-
-  async get<T>(url: string): Promise<T> {
-    const response = await this.axiosInstance.get<T>(url);
-    return response.data;
+1. Criar entity em `domain/entities/`
+2. Criar interface em `domain/repositories/`
+3. Criar service em `domain/services/`
+4. Implementar em `data/repositories/`
+5. Registrar em `data/di/container.ts`
+6. Criar context se necessário
+7. Usar nos componentes/rotas
   }
 }
 ```

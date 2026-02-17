@@ -1,203 +1,66 @@
-# API Integration Guide
+# API Integration
 
-## 🌐 Overview
+## Base URL
 
-Este guia explica como integrar o front-end com a API backend de autenticação.
-
----
-
-## 📍 Endpoints Esperados
-
-### Base URL
-
-```
-Desenvolvimento: http://localhost:3001
-Produção: https://api.tickethub.com
+Configure em `.env.development`:
+```bash
+VITE_API_BASE_URL=http://localhost:3001
+VITE_API_TIMEOUT=30000
 ```
 
-Configure em `.env.development` e `.env.production`.
+## Endpoints
 
----
-
-## 🔐 Autenticação
-
-### 1. Login
-
-**POST** `/auth/login`
-
-**Request:**
+### POST /auth/login
+Request:
+```json
+{ "email": "usuario@exemplo.com", "password": "SenhaForte123" }
+```
+Response (200):
 ```json
 {
-  "email": "usuario@exemplo.com",
-  "password": "SenhaForte123"
-}
-```
-
-**Response (200 OK):**
-```json
-{
-  "user": {
-    "id": "uuid-v4",
-    "name": "João Silva",
-    "email": "usuario@exemplo.com",
-    "createdAt": "2026-02-04T10:00:00Z"
-  },
+  "user": { "id": "uuid", "name": "João", "email": "usuario@exemplo.com" },
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 }
 ```
+Errors: 400 (dados inválidos), 401 (credenciais inválidas)
 
-**Errors:**
-- `400 Bad Request` - Dados inválidos
-- `401 Unauthorized` - Credenciais inválidas
-
----
-
-### 2. Registro
-
-**POST** `/auth/register`
-
-**Request:**
+### POST /auth/register
+Request:
 ```json
-{
-  "name": "João Silva",
-  "email": "usuario@exemplo.com",
-  "password": "SenhaForte123"
-}
+{ "name": "João", "email": "usuario@exemplo.com", "password": "SenhaForte123" }
 ```
+Response (201): igual a login
+Errors: 400 (dados inválidos), 409 (email já existe)
 
-**Response (201 Created):**
-```json
-{
-  "user": {
-    "id": "uuid-v4",
-    "name": "João Silva",
-    "email": "usuario@exemplo.com",
-    "createdAt": "2026-02-04T10:00:00Z"
-  },
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-}
-```
+### POST /auth/logout
+Headers: `Authorization: Bearer <token>`
+Response: 204 No Content
 
-**Errors:**
-- `400 Bad Request` - Dados inválidos
-- `409 Conflict` - Email já cadastrado
-
----
-
-### 3. Logout
-
-**POST** `/auth/logout`
-
-**Headers:**
-```
-Authorization: Bearer <token>
-```
-
-**Response (204 No Content)**
-
-**Errors:**
-- `401 Unauthorized` - Token inválido
-
----
-
-### 4. Validar Token
-
-**GET** `/auth/validate`
-
-**Headers:**
-```
-Authorization: Bearer <token>
-```
-
-**Response (200 OK):**
+### GET /auth/validate
+Headers: `Authorization: Bearer <token>`
+Response (200):
 ```json
 {
   "valid": true,
-  "user": {
-    "id": "uuid-v4",
-    "name": "João Silva",
-    "email": "usuario@exemplo.com"
-  }
+  "user": { "id": "uuid", "name": "João", "email": "usuario@exemplo.com" }
 }
 ```
 
-**Errors:**
-- `401 Unauthorized` - Token inválido ou expirado
+## Autenticação JWT
 
----
+- Token salvo em `localStorage` (key: `@tickethub:token`)
+- HttpClient adiciona automaticamente header `Authorization: Bearer <token>`
+- Erro 401 remove token e redireciona para login
 
-## 🔑 Autenticação JWT
+## Tratamento de Erros
 
-### Formato do Token
-
-O front-end espera receber um **JWT (JSON Web Token)** no formato:
-
-```
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-```
-
-### Fluxo de Autenticação
-
-1. **Login/Registro bem-sucedido:**
-   - API retorna `{ user, token }`
-   - Front-end salva token no `localStorage` (key: `@tickethub:token`)
-   - Front-end salva user no `localStorage` (key: `@tickethub:user`)
-
-2. **Requisições subsequentes:**
-   - `HttpClient` adiciona automaticamente header `Authorization: Bearer <token>`
-   - Via interceptor do axios
-
-3. **Token expirado (401):**
-   - Interceptor detecta erro 401
-   - Remove token do `localStorage`
-   - Redireciona para `/login` (opcional, atualmente comentado)
-
-4. **Logout:**
-   - Chama `POST /auth/logout`
-   - Remove token e user do `localStorage`
-   - Limpa header de Authorization
-
----
-
-## 🛠️ Testando a Integração
-
-### Mock Server (Desenvolvimento)
-
-Enquanto a API real não está pronta, você pode usar um **mock server**.
-
-#### Opção 1: JSON Server
-
-1. Instalar:
-```bash
-pnpm add -D json-server
-```
-
-2. Criar `db.json`:
-```json
-{
-  "users": [
-    {
-      "id": "1",
-      "name": "Test User",
-      "email": "test@test.com",
-      "password": "$2a$10$..." 
-    }
-  ]
-}
-```
-
-3. Criar `server.js`:
-```javascript
-const jsonServer = require('json-server');
-const server = jsonServer.create();
-const router = jsonServer.router('db.json');
-const middlewares = jsonServer.defaults();
-
-server.use(middlewares);
-server.use(jsonServer.bodyParser);
-
-// Mock login
-server.post('/auth/login', (req, res) => {
+| Código | Mensagem |
+|--------|----------|
+| 400 | Dados inválidos |
+| 401 | Credenciais/token inválido |
+| 409 | Email já cadastrado |
+| 500 | Erro no servidor |
+| Timeout | Tempo esgotado |
   const { email, password } = req.body;
   
   if (email === 'test@test.com' && password === '12345678') {

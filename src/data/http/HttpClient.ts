@@ -58,17 +58,11 @@ export class HttpClient {
 		);
 	}
 
-	/**
-	 * GET request
-	 */
 	async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
 		const response = await this.axiosInstance.get<T>(url, config);
 		return response.data;
 	}
 
-	/**
-	 * POST request
-	 */
 	async post<T>(
 		url: string,
 		data?: unknown,
@@ -78,9 +72,6 @@ export class HttpClient {
 		return response.data;
 	}
 
-	/**
-	 * PUT request
-	 */
 	async put<T>(
 		url: string,
 		data?: unknown,
@@ -90,17 +81,11 @@ export class HttpClient {
 		return response.data;
 	}
 
-	/**
-	 * DELETE request
-	 */
 	async delete<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
 		const response = await this.axiosInstance.delete<T>(url, config);
 		return response.data;
 	}
 
-	/**
-	 * PATCH request
-	 */
 	async patch<T>(
 		url: string,
 		data?: unknown,
@@ -110,30 +95,18 @@ export class HttpClient {
 		return response.data;
 	}
 
-	/**
-	 * Define token para requisições futuras
-	 */
 	setToken(token: string): void {
 		localStorage.setItem("@tickethub:token", token);
 	}
 
-	/**
-	 * Remove token armazenado
-	 */
 	clearToken(): void {
 		this.clearStoredToken();
 	}
 
-	/**
-	 * Obtém token do localStorage
-	 */
 	private getStoredToken(): string | null {
 		return localStorage.getItem("@tickethub:token");
 	}
 
-	/**
-	 * Remove token do localStorage
-	 */
 	private clearStoredToken(): void {
 		localStorage.removeItem("@tickethub:token");
 	}

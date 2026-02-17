@@ -2,6 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { LogIn, Ticket } from 'lucide-react'
 import { Controller, useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -44,13 +45,16 @@ function LoginPage() {
         password: data.password,
       })
       
-      // Login bem-sucedido, redireciona para home
-      navigate({ to: '/' })
+      toast.success('Login realizado com sucesso!')
+      // Login bem-sucedido, redireciona para dashboard
+      navigate({ to: '/dashboard' })
     } catch (error) {
       // Exibe erro no formulário
+      const errorMessage = error instanceof Error ? error.message : 'Erro ao fazer login'
       setError('root', {
-        message: error instanceof Error ? error.message : 'Erro ao fazer login',
+        message: errorMessage,
       })
+      toast.error(errorMessage)
     }
   }
 
@@ -106,12 +110,12 @@ function LoginPage() {
                   <Label htmlFor="password">
                     Senha
                   </Label>
-                  <a
-                    href="#"
+                  <Link
+                    to="/esqueci-senha"
                     className="text-sm hover:underline transition-colors"
                   >
                     Esqueceu a senha?
-                  </a>
+                  </Link>
                 </div>
                 <Controller
                   name="password"

@@ -9,6 +9,7 @@ import {
   Ticket,
   Users,
 } from 'lucide-react'
+import Header from '@/components/Header'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
@@ -64,6 +65,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Header />
       {/* Hero Section */}
       <section className="relative py-20 px-6 text-center overflow-hidden border-b">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iY3VycmVudENvbG9yIiBzdHJva2Utb3BhY2l0eT0iMC4wNSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-40"></div>
@@ -133,7 +135,7 @@ function App() {
               className="bg-card hover:bg-accent/50 transition-all duration-300 hover:shadow-lg group"
             >
               <CardContent className="p-6">
-                <div className="mb-4 group-hover:scale-110 transition-transform duration-300">
+                <div className="mb-4 transition-transform duration-300">
                   {feature.icon}
                 </div>
                 <h3 className="text-xl font-semibold mb-3">
@@ -167,7 +169,7 @@ function App() {
                     Criar Conta Grátis
                   </Link>
                 </Button>
-                <Button asChild size="lg" variant="outline" className="text-lg px-8">
+                <Button asChild size="lg" variant="secondary" className="text-lg px-8">
                   <Link to="/login">
                     Já tenho conta
                   </Link>
