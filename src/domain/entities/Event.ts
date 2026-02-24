@@ -28,6 +28,26 @@ export const createEventSchema = z.object({
 		.min(3, "Localização deve ter no mínimo 3 caracteres"),
 });
 
+// Schema para formulário de criação de evento com tickets opcionais
+export const createEventWithTicketsSchema = createEventSchema.extend({
+	num_tickets: z
+		.string()
+		.optional()
+		.transform((val) => {
+			if (!val || val === "") return undefined;
+			const num = Number(val);
+			return Number.isNaN(num) ? undefined : num;
+		}),
+	price: z
+		.string()
+		.optional()
+		.transform((val) => {
+			if (!val || val === "") return undefined;
+			const num = Number(val);
+			return Number.isNaN(num) ? undefined : num;
+		}),
+});
+
 // Schema para resposta da lista de eventos
 export const eventListSchema = z.array(eventSchema);
 
@@ -42,4 +62,7 @@ export const eventFiltersSchema = z.object({
 export type Event = z.infer<typeof eventSchema>;
 export type CreateEventPayload = z.infer<typeof createEventSchema>;
 export type CreateEventFormData = CreateEventPayload;
+export type CreateEventWithTicketsFormData = z.infer<
+	typeof createEventWithTicketsSchema
+>;
 export type EventFilters = z.infer<typeof eventFiltersSchema>;

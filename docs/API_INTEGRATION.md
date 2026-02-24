@@ -46,6 +46,150 @@ Response (200):
 }
 ```
 
+---
+
+## Eventos
+
+### POST /events
+Headers: `Authorization: Bearer <token>` (apenas Partners)
+Request:
+```json
+{
+  "name": "Festival de Música 2026",
+  "description": "Maior festival do ano",
+  "date": "2026-09-15T18:00:00Z",
+  "location": "São Paulo - SP"
+}
+```
+Response (201):
+```json
+{
+  "id": 1,
+  "name": "Festival de Música 2026",
+  "description": "Maior festival do ano",
+  "date": "2026-09-15T18:00:00Z",
+  "location": "São Paulo - SP",
+  "created_at": "2026-02-24T23:00:00Z",
+  "partner_id": 1
+}
+```
+Errors: 400 (dados inválidos), 401 (não autenticado), 403 (não é partner)
+
+### GET /events
+Opções de filtros via query params:
+- `?name=Festival` - busca por nome
+- `?date=2026-09-15` - busca por data
+- `?location=São Paulo` - busca por localização
+
+Response (200):
+```json
+[
+  {
+    "id": 1,
+    "name": "Festival de Música 2026",
+    "description": "Maior festival do ano",
+    "date": "2026-09-15T18:00:00Z",
+    "location": "São Paulo - SP",
+    "created_at": "2026-02-24T23:00:00Z",
+    "partner_id": 1
+  }
+]
+```
+
+---
+
+## Tickets
+
+### POST /events/:eventId/tickets
+Headers: `Authorization: Bearer <token>` (apenas Partners)
+Request:
+```json
+{
+  "num_tickets": 10,
+  "price": 50.00
+}
+```
+Response: 204 No Content
+
+**O que acontece:**
+- API cria N tickets para o evento
+- Cada ticket recebe location automática: "Location 1", "Location 2", etc.
+- Todos começam com status `available`
+
+Errors: 400 (dados inválidos), 401 (não autenticado), 403 (não é partner), 404 (evento não existe)
+
+### GET /events/:eventId/tickets
+Response (200):
+```json
+[
+  {
+    "id": 1,
+    "location": "Location 1",
+    "event_id": 1,
+    "price": "50.00",
+    "status": "available",
+    "created_at": "2026-02-24T23:01:51.000Z"
+  },
+  {
+    "id": 2,
+    "location": "Location 2",
+    "event_id": 1,
+    "price": "50.00",
+    "status": "sold",
+    "created_at": "2026-02-24T23:01:51.000Z"
+  }
+]
+```
+
+**Status possíveis:**
+- `available`: Disponível para compra
+- `sold`: Já vendido
+- `reserved`: Reservado (futuro)
+
+---
+
+## Compras
+
+### POST /purchases
+Headers: `Authorization: Bearer <token>` (apenas Customers)
+Request:
+```json
+{
+  "ticket_ids": [1, 2, 3],
+  "card_token": "tok_visa"
+}
+```
+Response (200):
+```json
+{
+  "id": 1,
+  "customer_id": 1,
+  "purchase_date": "2026-02-24T23:05:55.000Z",
+  "total_amount": "150.00",
+  "status": "paid"
+}
+```
+
+**O que acontece:**
+- API valida se todos os tickets estão `available`
+- Processa pagamento com o `card_token`
+- Marca tickets como `sold`
+- Cria registro da compra
+
+**Card Tokens Mock (desenvolvimento):**
+- `tok_visa` - Visa •••• 4242
+- `tok_mastercard` - Mastercard •••• 5555
+- `tok_amex` - American Express •••• 0005
+
+Errors: 
+- 400 (dados inválidos ou tickets indisponíveis)
+- 401 (não autenticado)
+- 403 (não é customer)
+- 404 (tickets não existem)
+- 422 (erro no pagamento)
+
+---
+
 ## Autenticação JWT
 
 - Token salvo em `localStorage` (key: `@tickethub:token`)
