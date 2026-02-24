@@ -30,22 +30,8 @@ export const createEventSchema = z.object({
 
 // Schema para formulário de criação de evento com tickets opcionais
 export const createEventWithTicketsSchema = createEventSchema.extend({
-	num_tickets: z
-		.string()
-		.optional()
-		.transform((val) => {
-			if (!val || val === "") return undefined;
-			const num = Number(val);
-			return Number.isNaN(num) ? undefined : num;
-		}),
-	price: z
-		.string()
-		.optional()
-		.transform((val) => {
-			if (!val || val === "") return undefined;
-			const num = Number(val);
-			return Number.isNaN(num) ? undefined : num;
-		}),
+	num_tickets: z.string().optional(),
+	price: z.string().optional(),
 });
 
 // Schema para resposta da lista de eventos

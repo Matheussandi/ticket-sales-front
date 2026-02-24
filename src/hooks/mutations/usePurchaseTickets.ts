@@ -17,6 +17,8 @@ export function usePurchaseTickets() {
       queryClient.invalidateQueries({ queryKey: ["events"] });
       // Invalida todos os tickets (status muda para sold)
       queryClient.invalidateQueries({ queryKey: ["tickets"] });
+      // Invalida minhas compras (atualiza lista)
+      queryClient.invalidateQueries({ queryKey: ["my-purchases"] });
     },
   });
 }

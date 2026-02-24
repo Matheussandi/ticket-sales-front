@@ -108,6 +108,35 @@ export const forgotPasswordSchema = z.object({
 		
 });
 
+// Schema para atualização de perfil (nome e email)
+export const updateProfileSchema = z.object({
+	name: z
+		.string()
+		.min(1, "Nome é obrigatório")
+		.min(3, "Nome deve ter no mínimo 3 caracteres"),
+	email: z
+		.string()
+		.min(1, "Email é obrigatório")
+		.email("Email inválido"),
+});
+
+// Schema para atualização de senha
+export const updatePasswordSchema = z.object({
+	currentPassword: z
+		.string()
+		.min(1, "Senha atual é obrigatória"),
+	newPassword: z
+		.string()
+		.min(1, "Nova senha é obrigatória")
+		.min(8, "Nova senha deve ter no mínimo 8 caracteres"),
+	confirmPassword: z
+		.string()
+		.min(1, "Confirmação de senha é obrigatória"),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+	message: "As senhas não coincidem",
+	path: ["confirmPassword"],
+});
+
 export type User = z.infer<typeof userSchema>;
 export type LoginRequest = z.infer<typeof loginRequestSchema>;
 export type RegisterRequest = z.infer<typeof registerRequestSchema>;
@@ -119,6 +148,8 @@ export type RegisterFormData = z.infer<typeof registerSchema>;
 export type RegisterPartnerFormData = z.infer<typeof registerPartnerSchema>;
 export type RegisterCustomerFormData = z.infer<typeof registerCustomerSchema>;
 export type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
+export type UpdateProfileData = z.infer<typeof updateProfileSchema>;
+export type UpdatePasswordData = z.infer<typeof updatePasswordSchema>;
 export type LoginCredentials = LoginRequest;
 export type RegisterData = RegisterRequest;
 export type RegisterPartnerData = RegisterPartnerRequest;

@@ -1,4 +1,4 @@
-import type { CreatePurchasePayload, Purchase } from "../entities/Purchase";
+import type { CreatePurchasePayload, Purchase, PurchaseWithDetails } from "../entities/Purchase";
 
 /**
  * Interface do repositório de compras
@@ -11,4 +11,10 @@ export interface IPurchaseRepository {
    * @returns Dados da compra criada
    */
   createPurchase(data: CreatePurchasePayload): Promise<Purchase>;
+
+  /**
+   * Lista todas as compras do usuário logado
+   * @returns Lista de compras com detalhes
+   */
+  getMyPurchases(): Promise<PurchaseWithDetails[]>;
 }

@@ -1,8 +1,9 @@
 import type {
   CreatePurchasePayload,
   Purchase,
+  PurchaseWithDetails,
 } from "../../domain/entities/Purchase";
-import { purchaseSchema } from "../../domain/entities/Purchase";
+import { purchaseListSchema, purchaseSchema } from "../../domain/entities/Purchase";
 import type { IPurchaseRepository } from "../../domain/repositories/IPurchaseRepository";
 import type { HttpClient } from "../http/HttpClient";
 
@@ -19,5 +20,13 @@ export class PurchaseRepositoryImpl implements IPurchaseRepository {
     // Validação com Zod
     const validatedPurchase = purchaseSchema.parse(response);
     return validatedPurchase;
+  }
+
+  async getMyPurchases(): Promise<PurchaseWithDetails[]> {
+    const response = await this.httpClient.get<PurchaseWithDetails[]>("/purchases");
+
+    // Validação com Zod
+    const validatedPurchases = purchaseListSchema.parse(response);
+    return validatedPurchases;
   }
 }

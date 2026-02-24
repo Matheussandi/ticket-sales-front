@@ -1,4 +1,4 @@
-import type { CreatePurchasePayload, Purchase } from "../entities/Purchase";
+import type { CreatePurchasePayload, Purchase, PurchaseWithDetails } from "../entities/Purchase";
 import type { IPurchaseRepository } from "../repositories/IPurchaseRepository";
 
 /**
@@ -30,6 +30,26 @@ export class PurchaseService {
         error instanceof Error
           ? error.message
           : "Erro ao processar compra",
+      );
+    }
+  }
+
+  /**
+   * Lista todas as compras do usuário logado
+   * @returns Lista de compras com detalhes, ordenadas por data (mais recente primeiro)
+   */
+  async getMyPurchases(): Promise<PurchaseWithDetails[]> {
+    try {
+      const purchases = await this.purchaseRepository.getMyPurchases();
+      // Ordenar por data de compra (mais recente primeiro)
+      return purchases.sort((a, b) => 
+        new Date(b.purchase_date).getTime() - new Date(a.purchase_date).getTime()
+      );
+    } catch (error) {
+      throw new Error(
+        error instanceof Error
+          ? error.message
+          : "Erro ao buscar compras",
       );
     }
   }

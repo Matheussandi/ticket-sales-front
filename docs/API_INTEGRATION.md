@@ -48,6 +48,42 @@ Response (200):
 
 ---
 
+## Perfil
+
+### PUT /profile
+Headers: `Authorization: Bearer <token>`
+Request:
+```json
+{
+  "name": "João Silva",
+  "email": "joao.silva@exemplo.com"
+}
+```
+Response (200):
+```json
+{
+  "id": "uuid",
+  "name": "João Silva",
+  "email": "joao.silva@exemplo.com",
+  "role": "customer"
+}
+```
+Errors: 400 (dados inválidos), 401 (não autenticado), 409 (email já existe)
+
+### PUT /profile/password
+Headers: `Authorization: Bearer <token>`
+Request:
+```json
+{
+  "currentPassword": "SenhaAtual123",
+  "newPassword": "NovaSenha456"
+}
+```
+Response: 204 No Content
+Errors: 400 (dados inválidos), 401 (senha atual incorreta)
+
+---
+
 ## Eventos
 
 ### POST /events
@@ -187,6 +223,57 @@ Errors:
 - 403 (não é customer)
 - 404 (tickets não existem)
 - 422 (erro no pagamento)
+
+### GET /purchases
+Headers: `Authorization: Bearer <token>` (apenas Customers)
+Response (200):
+```json
+[
+  {
+    "id": 1,
+    "customer_id": 1,
+    "purchase_date": "2026-02-24T23:05:55.000Z",
+    "total_amount": "150.00",
+    "status": "paid",
+    "event": {
+      "id": 1,
+      "name": "Festival de Música 2026",
+      "description": "Maior festival do ano",
+      "date": "2026-09-15T18:00:00Z",
+      "location": "São Paulo - SP",
+      "created_at": "2026-02-24T23:00:00Z",
+      "partner_id": 1
+    },
+    "tickets": [
+      {
+        "id": 1,
+        "location": "Location 1",
+        "event_id": 1,
+        "price": "50.00",
+        "status": "sold",
+        "created_at": "2026-02-24T23:01:51.000Z"
+      },
+      {
+        "id": 2,
+        "location": "Location 2",
+        "event_id": 1,
+        "price": "50.00",
+        "status": "sold",
+        "created_at": "2026-02-24T23:01:51.000Z"
+      }
+    ]
+  }
+]
+```
+
+**Descrição:**
+- Retorna todas as compras do customer logado
+- Inclui detalhes do evento e tickets associados
+- Ordenado por data de compra (mais recente primeiro)
+
+Errors:
+- 401 (não autenticado)
+- 403 (não é customer)
 
 ---
 

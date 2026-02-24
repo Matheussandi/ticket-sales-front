@@ -3,7 +3,10 @@ import type {
 	LoginCredentials, 
 	RegisterCustomerData, 
 	RegisterData,
-	RegisterPartnerData
+	RegisterPartnerData,
+	UpdatePasswordData,
+	UpdateProfileData,
+	User
 } from "../entities/User";
 
 /**
@@ -19,4 +22,6 @@ export interface IAuthRepository {
 	registerCustomer(data: RegisterCustomerData): Promise<AuthResponse>;
 	logout(): Promise<void>;
 	validateToken(): Promise<boolean>;
+	updateProfile(data: UpdateProfileData): Promise<User>;
+	updatePassword(data: UpdatePasswordData): Promise<void>;
 }

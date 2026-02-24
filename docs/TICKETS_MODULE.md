@@ -94,6 +94,23 @@ interface Purchase {
 - Envia `POST /purchases` com IDs dos tickets e `card_token`
 - API processa pagamento e marca tickets como vendidos
 - Customer recebe confirmação via toast
+- Lista de compras é atualizada automaticamente
+
+### 4. Customer: Visualizar Minhas Compras
+
+1. Clica em "Meus Ingressos" no menu lateral
+2. Vê lista de todas as compras realizadas com:
+   - Nome e descrição do evento
+   - Data e local do evento
+   - Lista de ingressos comprados (location e preço)
+   - Total pago
+   - Status da compra (Pago/Pendente/Cancelado)
+   - Data da compra
+
+**O que acontece:**
+- Sistema busca `GET /purchases` do usuário logado
+- API retorna compras com detalhes de evento e tickets
+- Lista ordenada por data (mais recente primeiro)
 
 ## Métodos de Pagamento
 
@@ -140,11 +157,15 @@ const PAYMENT_METHODS = [
 - [useCreateTickets.ts](../src/hooks/mutations/useCreateTickets.ts) - mutation para criar tickets
 - [usePurchaseTickets.ts](../src/hooks/mutations/usePurchaseTickets.ts) - mutation para comprar
 - [useTicketsByEvent.ts](../src/hooks/queries/useTicketsByEvent.ts) - queries para listar tickets
+- [useMyPurchases.ts](../src/hooks/queries/useMyPurchases.ts) - query para listar compras do usuário
 
 **Componentes:**
 - [CreateEventDialog.tsx](../src/components/events/CreateEventDialog.tsx) - expandido com campos de tickets
 - [PurchaseTicketDialog.tsx](../src/components/events/PurchaseTicketDialog.tsx) - dialog de compra
 - [events/index.tsx](../src/routes/_authenticated/events/index.tsx) - listagem adaptada por role
+
+**Páginas:**
+- [tickets.tsx](../src/routes/_authenticated/tickets.tsx) - listagem de compras do customer
 
 ## Validações
 
@@ -180,11 +201,12 @@ card_token: z.string().min(1)
 ["events", eventId, "tickets"]              // Lista de tickets de um evento
 ["events", eventId, "tickets", "available-count"]  // Contagem de disponíveis
 ["events"]                                  // Lista de eventos (afetada por compras)
+["my-purchases"]                            // Lista de compras do customer
 ```
 
 **Invalidações:**
 - **Após criar tickets**: invalida `["events", eventId, "tickets"]` e `["events"]`
-- **Após comprar tickets**: invalida `["events"]` e `["tickets"]` (todas as queries)
+- **Após comprar tickets**: invalida `["events"]`, `["tickets"]` e `["my-purchases"]`
 
 ## Diferenças por Role
 
@@ -195,6 +217,7 @@ card_token: z.string().min(1)
 | Ver coluna "Ingressos" | ❌ | ✅ |
 | Botão "Comprar" | ❌ | ✅ |
 | Ver "Criado em" | ✅ | ❌ |
+| Acessar "Meus Ingressos" | ❌ | ✅ |
 
 ## Exemplos de Uso
 
@@ -244,12 +267,15 @@ POST /purchases
 
 ## Melhorias Futuras
 
-- [ ] Histórico de compras do customer (`GET /purchases`)
+- [x] Histórico de compras do customer (`GET /purchases`) - **Implementado**
 - [ ] Detalhes do evento com mapa de assentos
 - [ ] Reserva temporária de tickets (status `reserved`)
 - [ ] Cancelamento de compras
 - [ ] Gateway de pagamento real
 - [ ] Geração de QR Code para tickets
+- [ ] Validação de tickets no evento
+- [ ] Download de PDF com ingressos
+- [ ] Notificações por email após compra
 - [ ] Validação de tickets no evento
 
 ---

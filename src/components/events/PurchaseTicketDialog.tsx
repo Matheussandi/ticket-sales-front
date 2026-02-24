@@ -27,10 +27,7 @@ import { useTicketsByEvent } from "@/hooks/queries/useTicketsByEvent";
 
 // Schema para o formulário de compra
 const purchaseFormSchema = z.object({
-	quantity: z
-		.string()
-		.min(1, "Selecione pelo menos 1 ticket")
-		.transform((val) => Number(val)),
+	quantity: z.string().min(1, "Selecione pelo menos 1 ticket"),
 	card_token: z.string().min(1, "Selecione um método de pagamento"),
 });
 
@@ -75,22 +72,25 @@ export function PurchaseTicketDialog({
 	} = useForm<PurchaseFormData>({
 		resolver: zodResolver(purchaseFormSchema),
 		defaultValues: {
-			quantity: 1,
+			quantity: "1",
 			card_token: "",
 		},
 	});
 
 	const quantity = watch("quantity");
-	const totalAmount = (Number(ticketPrice) * (quantity || 0)).toFixed(2);
+	const quantityNum = quantity ? Number(quantity) : 0;
+	const totalAmount = (Number(ticketPrice) * quantityNum).toFixed(2);
 
 	const onSubmit = async (data: PurchaseFormData) => {
 		try {
+			const quantity = Number(data.quantity);
+
 			// Seleciona os primeiros N tickets disponíveis
 			const selectedTickets = availableTickets
-				.slice(0, data.quantity)
+				.slice(0, quantity)
 				.map((t) => t.id);
 
-			if (selectedTickets.length < data.quantity) {
+			if (selectedTickets.length < quantity) {
 				toast.error("Não há tickets suficientes disponíveis");
 				return;
 			}

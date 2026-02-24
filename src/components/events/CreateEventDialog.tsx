@@ -61,12 +61,20 @@ export function CreateEventDialog({
 			});
 
 			// Se houver dados de tickets, cria os tickets
-			if (num_tickets && price && typeof num_tickets === "number" && typeof price === "number") {
+			const numTicketsNum = num_tickets ? Number(num_tickets) : undefined;
+			const priceNum = price ? Number(price) : undefined;
+
+			if (
+				numTicketsNum &&
+				priceNum &&
+				numTicketsNum > 0 &&
+				priceNum > 0
+			) {
 				await createTickets.mutateAsync({
 					eventId: event.id,
 					data: {
-						num_tickets,
-						price,
+						num_tickets: numTicketsNum,
+						price: priceNum,
 					},
 				});
 				toast.success("Evento e tickets criados com sucesso!");

@@ -4,6 +4,8 @@ import type {
 	RegisterCustomerData,
 	RegisterData,
 	RegisterPartnerData,
+	UpdatePasswordData,
+	UpdateProfileData,
 	User,
 } from "../../domain/entities/User";
 import type { IAuthRepository } from "../../domain/repositories/IAuthRepository";
@@ -164,5 +166,26 @@ export class AuthRepositoryImpl implements IAuthRepository {
 			this.tokenStorage.clear();
 			return false;
 		}
+	}
+
+	async updateProfile(data: UpdateProfileData): Promise<User> {
+		const response = await this.httpClient.put<User>("/profile", data);
+
+		// Atualiza o usuário no storage
+		const currentUser = this.tokenStorage.getUser<User>();
+		const updatedUser: User = {
+			...(currentUser || {}),
+			...response,
+		} as User;
+
+		this.tokenStorage.saveUser(updatedUser);
+		return updatedUser;
+	}
+
+	async updatePassword(data: UpdatePasswordData): Promise<void> {
+		await this.httpClient.put("/profile/password", {
+			currentPassword: data.currentPassword,
+			newPassword: data.newPassword,
+		});
 	}
 }
