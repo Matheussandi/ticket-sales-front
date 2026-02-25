@@ -13,11 +13,13 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import {
-	type CreateEventFormData,
-	createEventSchema,
+	type CreateEventWithTicketsFormData,
+	createEventWithTicketsSchema,
 } from "@/domain/entities/Event";
 import { useCreateEvent } from "@/hooks/mutations/useCreateEvent";
+import { useCreateTickets } from "@/hooks/mutations/useCreateTickets";
 
 interface CreateEventDialogProps {
 	open: boolean;
@@ -32,22 +34,54 @@ export function CreateEventDialog({
 	const descriptionId = useId();
 	const dateId = useId();
 	const locationId = useId();
+	const numTicketsId = useId();
+	const priceId = useId();
 
 	const createEvent = useCreateEvent();
+	const createTickets = useCreateTickets();
 
 	const {
 		register,
 		handleSubmit,
 		formState: { errors, isSubmitting },
 		reset,
-	} = useForm<CreateEventFormData>({
-		resolver: zodResolver(createEventSchema),
+	} = useForm<CreateEventWithTicketsFormData>({
+		resolver: zodResolver(createEventWithTicketsSchema),
 	});
 
-	const onSubmit = async (data: CreateEventFormData) => {
+	const onSubmit = async (data: CreateEventWithTicketsFormData) => {
 		try {
-			await createEvent.mutateAsync(data);
-			toast.success("Evento criado com sucesso!");
+			// Primeiro cria o evento
+			const { name, description, date, location, num_tickets, price } = data;
+			const event = await createEvent.mutateAsync({
+				name,
+				description,
+				date,
+				location,
+			});
+
+			// Se houver dados de tickets, cria os tickets
+			const numTicketsNum = num_tickets ? Number(num_tickets) : undefined;
+			const priceNum = price ? Number(price) : undefined;
+
+			if (
+				numTicketsNum &&
+				priceNum &&
+				numTicketsNum > 0 &&
+				priceNum > 0
+			) {
+				await createTickets.mutateAsync({
+					eventId: event.id,
+					data: {
+						num_tickets: numTicketsNum,
+						price: priceNum,
+					},
+				});
+				toast.success("Evento e tickets criados com sucesso!");
+			} else {
+				toast.success("Evento criado com sucesso!");
+			}
+
 			reset();
 			onOpenChange(false);
 		} catch (error) {
@@ -132,6 +166,52 @@ export function CreateEventDialog({
 								{errors.location.message}
 							</p>
 						)}
+					</div>
+
+					<Separator />
+
+					<div className="space-y-4">
+						<div>
+							<h4 className="text-sm font-medium">Ingressos (Opcional)</h4>
+							<p className="text-sm text-muted-foreground">
+								Defina quantidade e preço dos ingressos
+							</p>
+						</div>
+
+						<div className="grid grid-cols-2 gap-4">
+							<div className="space-y-2">
+								<Label htmlFor={numTicketsId}>Quantidade</Label>
+								<Input
+									id={numTicketsId}
+									type="number"
+									placeholder="Ex: 100"
+									min="1"
+									{...register("num_tickets")}
+								/>
+								{errors.num_tickets && (
+									<p className="text-sm text-destructive">
+										{errors.num_tickets.message}
+									</p>
+								)}
+							</div>
+
+							<div className="space-y-2">
+								<Label htmlFor={priceId}>Preço (R$)</Label>
+								<Input
+									id={priceId}
+									type="number"
+									placeholder="Ex: 50.00"
+									min="0.01"
+									step="0.01"
+									{...register("price")}
+								/>
+								{errors.price && (
+									<p className="text-sm text-destructive">
+										{errors.price.message}
+									</p>
+								)}
+							</div>
+						</div>
 					</div>
 
 					<DialogFooter>

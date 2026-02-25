@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Calendar, MapPin, Plus, Search } from "lucide-react";
+import { Calendar, MapPin, Plus, Search, Ticket } from "lucide-react";
 import { useId, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { CreateEventDialog } from "@/components/events/CreateEventDialog";
+import { PurchaseTicketDialog } from "@/components/events/PurchaseTicketDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,9 +24,11 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import type { EventFilters } from "@/domain/entities/Event";
+import type { Event, EventFilters } from "@/domain/entities/Event";
 import { useEventList } from "@/hooks/queries/useEventList";
+import { useAvailableTicketsCount } from "@/hooks/queries/useTicketsByEvent";
 import { useDebounce } from "@/hooks/useDebounce";
+import { useIsCustomer, useIsPartner } from "@/hooks/useRole";
 
 export const Route = createFileRoute("/_authenticated/events/")({
 	component: EventsPage,
@@ -36,7 +39,11 @@ function EventsPage() {
 	const dateFilterId = useId();
 	const locationFilterId = useId();
 
+	const isPartner = useIsPartner();
+	const isCustomer = useIsCustomer();
+
 	const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+	const [purchaseEvent, setPurchaseEvent] = useState<Event | null>(null);
 
 	const { control, watch, reset } = useForm<EventFilters>({
 		defaultValues: {
@@ -74,13 +81,17 @@ function EventsPage() {
 				<div>
 					<h1 className="text-3xl font-bold">Eventos</h1>
 					<p className="text-muted-foreground mt-1">
-						Gerencie todos os seus eventos
+						{isPartner
+							? "Gerencie todos os seus eventos"
+							: "Explore eventos e compre seus ingressos"}
 					</p>
 				</div>
-				<Button onClick={() => setIsCreateDialogOpen(true)}>
-					<Plus className="mr-2 h-4 w-4" />
-					Criar Evento
-				</Button>
+				{isPartner && (
+					<Button onClick={() => setIsCreateDialogOpen(true)}>
+						<Plus className="mr-2 h-4 w-4" />
+						Criar Evento
+					</Button>
+				)}
 			</div>
 
 			{/* Filters */}
@@ -116,11 +127,7 @@ function EventsPage() {
 								name="date"
 								control={control}
 								render={({ field }) => (
-									<Input
-										{...field}
-										id={dateFilterId}
-										type="date"
-									/>
+									<Input {...field} id={dateFilterId} type="date" />
 								)}
 							/>
 						</div>
@@ -168,8 +175,8 @@ function EventsPage() {
 				<CardContent>
 					{isLoading ? (
 						<div className="space-y-3">
-							{[...Array(5)].map((_, i) => (
-								<Skeleton key={i} className="h-12 w-full" />
+							{Array.from({ length: 5 }, (_, i) => (
+								<Skeleton key={`skeleton-${i}`} className="h-12 w-full" />
 							))}
 						</div>
 					) : error ? (
@@ -185,12 +192,10 @@ function EventsPage() {
 							<p className="text-muted-foreground mb-4">
 								{hasActiveFilters
 									? "Tente ajustar os filtros ou limpe-os para ver todos os eventos"
-									: "Comece criando seu primeiro evento"}
+									: isPartner
+										? "Comece criando seu primeiro evento"
+										: "Nenhum evento disponível no momento"}
 							</p>
-							<Button onClick={() => setIsCreateDialogOpen(true)}>
-								<Plus className="mr-2 h-4 w-4" />
-								Criar Primeiro Evento
-							</Button>
 						</div>
 					) : (
 						<Table>
@@ -201,42 +206,23 @@ function EventsPage() {
 									<TableHead>Data</TableHead>
 									<TableHead>Localização</TableHead>
 									<TableHead>Status</TableHead>
-									<TableHead>Criado em</TableHead>
+									{isCustomer && <TableHead>Ingressos</TableHead>}
+									{isPartner && <TableHead>Criado em</TableHead>}
+									{isCustomer && (
+										<TableHead className="text-right">Ações</TableHead>
+									)}
 								</TableRow>
 							</TableHeader>
 							<TableBody>
-								{events?.map((event) => {
-									const eventDate = new Date(event.date);
-									const now = new Date();
-									const isUpcoming = eventDate > now;
-
-									return (
-										<TableRow key={event.id}>
-											<TableCell className="font-medium">{event.name}</TableCell>
-											<TableCell className="max-w-xs truncate">
-												{event.description}
-											</TableCell>
-											<TableCell>
-												{eventDate.toLocaleDateString("pt-BR", {
-													day: "2-digit",
-													month: "2-digit",
-													year: "numeric",
-													hour: "2-digit",
-													minute: "2-digit",
-												})}
-											</TableCell>
-											<TableCell>{event.location}</TableCell>
-											<TableCell>
-												<Badge variant={isUpcoming ? "default" : "secondary"}>
-													{isUpcoming ? "Próximo" : "Realizado"}
-												</Badge>
-											</TableCell>
-											<TableCell className="text-muted-foreground text-sm">
-												{new Date(event.created_at).toLocaleDateString("pt-BR")}
-											</TableCell>
-										</TableRow>
-									);
-								})}
+								{events?.map((event) => (
+									<EventTableRow
+										key={event.id}
+										event={event}
+										isCustomer={isCustomer}
+										isPartner={isPartner}
+										onPurchaseClick={() => setPurchaseEvent(event)}
+									/>
+								))}
 							</TableBody>
 						</Table>
 					)}
@@ -248,6 +234,90 @@ function EventsPage() {
 				open={isCreateDialogOpen}
 				onOpenChange={setIsCreateDialogOpen}
 			/>
+
+			{/* Purchase Ticket Dialog */}
+			{purchaseEvent && (
+				<PurchaseTicketDialog
+					open={!!purchaseEvent}
+					onOpenChange={(open) => !open && setPurchaseEvent(null)}
+					event={purchaseEvent}
+				/>
+			)}
 		</div>
+	);
+}
+
+// Componente separado para renderizar cada linha da tabela
+interface EventTableRowProps {
+	event: Event;
+	isCustomer: boolean;
+	isPartner: boolean;
+	onPurchaseClick: () => void;
+}
+
+function EventTableRow({
+	event,
+	isCustomer,
+	isPartner,
+	onPurchaseClick,
+}: EventTableRowProps) {
+	const eventDate = new Date(event.date);
+	const now = new Date();
+	const isUpcoming = eventDate > now;
+
+	// Busca contagem de tickets disponíveis (apenas para customers)
+	const { data: availableCount, isLoading } = useAvailableTicketsCount(
+		event.id,
+	);
+
+	return (
+		<TableRow>
+			<TableCell className="font-medium">{event.name}</TableCell>
+			<TableCell className="max-w-xs truncate">{event.description}</TableCell>
+			<TableCell>
+				{eventDate.toLocaleDateString("pt-BR", {
+					day: "2-digit",
+					month: "2-digit",
+					year: "numeric",
+					hour: "2-digit",
+					minute: "2-digit",
+				})}
+			</TableCell>
+			<TableCell>{event.location}</TableCell>
+			<TableCell>
+				<Badge variant={isUpcoming ? "default" : "secondary"}>
+					{isUpcoming ? "Próximo" : "Realizado"}
+				</Badge>
+			</TableCell>
+			{isCustomer && (
+				<TableCell>
+					{isLoading ? (
+						<Skeleton className="h-6 w-16" />
+					) : (
+						<Badge variant="outline" className="gap-1">
+							<Ticket className="h-3 w-3" />
+							{availableCount || 0}
+						</Badge>
+					)}
+				</TableCell>
+			)}
+			{isPartner && (
+				<TableCell className="text-muted-foreground text-sm">
+					{new Date(event.created_at).toLocaleDateString("pt-BR")}
+				</TableCell>
+			)}
+			{isCustomer && (
+				<TableCell className="text-right">
+					<Button
+						size="sm"
+						onClick={onPurchaseClick}
+						disabled={!isUpcoming || (availableCount ?? 0) === 0}
+					>
+						<Ticket className="mr-2 h-4 w-4" />
+						Comprar
+					</Button>
+				</TableCell>
+			)}
+		</TableRow>
 	);
 }

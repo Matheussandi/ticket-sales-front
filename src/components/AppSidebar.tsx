@@ -1,4 +1,4 @@
-import { Link, useMatchRoute } from "@tanstack/react-router";
+import { Link, useMatchRoute, useRouter } from "@tanstack/react-router";
 import { Calendar, Home, LogOut, Ticket, User } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import {
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
+	useSidebar,
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRole } from "@/hooks/useRole";
@@ -62,13 +63,22 @@ export function AppSidebar() {
 	const { user, logout } = useAuth();
 	const matchRoute = useMatchRoute();
 	const role = useRole();
+	const { isMobile, setOpenMobile } = useSidebar();
+	const router = useRouter();
 
 	const menuItems = menuItemsByRole[role];
+
+	const handleMenuItemClick = () => {
+		if (isMobile) {
+			setOpenMobile(false);
+		}
+	};
 
 	const handleLogout = async () => {
 		try {
 			await logout();
 			toast.success("Logout realizado com sucesso!");
+			router.navigate({ to: "/login" });
 		} catch {
 			toast.error("Erro ao fazer logout");
 		}
@@ -93,7 +103,7 @@ export function AppSidebar() {
 								return (
 									<SidebarMenuItem key={item.title}>
 										<SidebarMenuButton asChild isActive={!!isActive}>
-											<Link to={item.url}>
+											<Link to={item.url} onClick={handleMenuItemClick}>
 												<item.icon className="h-4 w-4" />
 												<span>{item.title}</span>
 											</Link>

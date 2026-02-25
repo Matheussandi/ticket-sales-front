@@ -27,6 +27,7 @@ interface AuthContextData {
 	registerPartner: (data: RegisterPartnerData) => Promise<void>;
 	registerCustomer: (data: RegisterCustomerData) => Promise<void>;
 	logout: () => Promise<void>;
+	updateUser: (user: User) => void;
 }
 
 /**
@@ -156,6 +157,13 @@ export function AuthProvider({ children, authService }: AuthProviderProps) {
 		}
 	};
 
+	/**
+	 * Atualiza dados do usuário
+	 */
+	const updateUser = (updatedUser: User): void => {
+		setUser(updatedUser);
+	};
+
 	const value: AuthContextData = {
 		user,
 		isAuthenticated: !!user,
@@ -165,6 +173,7 @@ export function AuthProvider({ children, authService }: AuthProviderProps) {
 		registerPartner,
 		registerCustomer,
 		logout,
+		updateUser,
 	};
 
 	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -3,7 +3,10 @@ import type {
 	LoginCredentials, 
 	RegisterCustomerData, 
 	RegisterData,
-	RegisterPartnerData
+	RegisterPartnerData,
+	UpdatePasswordData,
+	UpdateProfileData,
+	User
 } from "../entities/User";
 import type { IAuthRepository } from "../repositories/IAuthRepository";
 
@@ -75,6 +78,32 @@ export class AuthService {
 			return await this.authRepository.validateToken();
 		} catch {
 			return false;
+		}
+	}
+
+	async updateProfile(data: UpdateProfileData): Promise<User> {
+		try {
+			const user = await this.authRepository.updateProfile(data);
+			return user;
+		} catch (error) {
+			throw new Error(
+				error instanceof Error ? error.message : "Erro ao atualizar perfil",
+			);
+		}
+	}
+
+	async updatePassword(data: UpdatePasswordData): Promise<void> {
+		// Validação de negócio: nova senha não pode ser igual à atual
+		if (data.currentPassword === data.newPassword) {
+			throw new Error("A nova senha deve ser diferente da senha atual");
+		}
+
+		try {
+			await this.authRepository.updatePassword(data);
+		} catch (error) {
+			throw new Error(
+				error instanceof Error ? error.message : "Erro ao atualizar senha",
+			);
 		}
 	}
 }
