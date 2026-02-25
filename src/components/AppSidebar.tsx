@@ -14,6 +14,7 @@ import {
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
+	useSidebar,
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRole } from "@/hooks/useRole";
@@ -62,8 +63,15 @@ export function AppSidebar() {
 	const { user, logout } = useAuth();
 	const matchRoute = useMatchRoute();
 	const role = useRole();
+	const { isMobile, setOpenMobile } = useSidebar();
 
 	const menuItems = menuItemsByRole[role];
+
+	const handleMenuItemClick = () => {
+		if (isMobile) {
+			setOpenMobile(false);
+		}
+	};
 
 	const handleLogout = async () => {
 		try {
@@ -93,7 +101,7 @@ export function AppSidebar() {
 								return (
 									<SidebarMenuItem key={item.title}>
 										<SidebarMenuButton asChild isActive={!!isActive}>
-											<Link to={item.url}>
+											<Link to={item.url} onClick={handleMenuItemClick}>
 												<item.icon className="h-4 w-4" />
 												<span>{item.title}</span>
 											</Link>

@@ -127,11 +127,7 @@ function EventsPage() {
 								name="date"
 								control={control}
 								render={({ field }) => (
-									<Input
-										{...field}
-										id={dateFilterId}
-										type="date"
-									/>
+									<Input {...field} id={dateFilterId} type="date" />
 								)}
 							/>
 						</div>
@@ -200,12 +196,6 @@ function EventsPage() {
 										? "Comece criando seu primeiro evento"
 										: "Nenhum evento disponível no momento"}
 							</p>
-							{isPartner && (
-								<Button onClick={() => setIsCreateDialogOpen(true)}>
-									<Plus className="mr-2 h-4 w-4" />
-									Criar Primeiro Evento
-								</Button>
-							)}
 						</div>
 					) : (
 						<Table>
@@ -218,7 +208,9 @@ function EventsPage() {
 									<TableHead>Status</TableHead>
 									{isCustomer && <TableHead>Ingressos</TableHead>}
 									{isPartner && <TableHead>Criado em</TableHead>}
-									{isCustomer && <TableHead className="text-right">Ações</TableHead>}
+									{isCustomer && (
+										<TableHead className="text-right">Ações</TableHead>
+									)}
 								</TableRow>
 							</TableHeader>
 							<TableBody>
@@ -281,9 +273,7 @@ function EventTableRow({
 	return (
 		<TableRow>
 			<TableCell className="font-medium">{event.name}</TableCell>
-			<TableCell className="max-w-xs truncate">
-				{event.description}
-			</TableCell>
+			<TableCell className="max-w-xs truncate">{event.description}</TableCell>
 			<TableCell>
 				{eventDate.toLocaleDateString("pt-BR", {
 					day: "2-digit",
