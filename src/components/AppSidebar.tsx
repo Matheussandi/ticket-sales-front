@@ -1,4 +1,4 @@
-import { Link, useMatchRoute } from "@tanstack/react-router";
+import { Link, useMatchRoute, useRouter } from "@tanstack/react-router";
 import { Calendar, Home, LogOut, Ticket, User } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -64,6 +64,7 @@ export function AppSidebar() {
 	const matchRoute = useMatchRoute();
 	const role = useRole();
 	const { isMobile, setOpenMobile } = useSidebar();
+	const router = useRouter();
 
 	const menuItems = menuItemsByRole[role];
 
@@ -77,6 +78,7 @@ export function AppSidebar() {
 		try {
 			await logout();
 			toast.success("Logout realizado com sucesso!");
+			router.navigate({ to: "/login" });
 		} catch {
 			toast.error("Erro ao fazer logout");
 		}
