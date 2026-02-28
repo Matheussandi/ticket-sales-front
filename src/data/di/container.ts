@@ -16,17 +16,14 @@ import { PurchaseRepositoryImpl } from "../repositories/PurchaseRepositoryImpl";
 import { TicketRepositoryImpl } from "../repositories/TicketRepositoryImpl";
 import { TokenStorage } from "../storage/TokenStorage";
 
-// Infrastructure Layer (Singletons)
 const httpClient = new HttpClient();
 const tokenStorage = new TokenStorage();
 
-// Data Layer (Repositories)
 const authRepository = new AuthRepositoryImpl(httpClient, tokenStorage);
 const eventRepository = new EventRepositoryImpl(httpClient);
 const ticketRepository = new TicketRepositoryImpl(httpClient);
 const purchaseRepository = new PurchaseRepositoryImpl(httpClient);
 
-// Domain Layer (Services)
 export const authService = new AuthService(authRepository);
 export const eventService = new EventService(eventRepository);
 export const ticketService = new TicketService(ticketRepository);
