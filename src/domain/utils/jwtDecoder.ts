@@ -5,8 +5,9 @@ import { jwtDecode } from "jwt-decode";
  */
 export interface JwtPayload {
 	id: number;
+	name: string;
 	email: string;
-	role: string;
+	role: "partner" | "customer";
 	iat: number;
 	exp: number;
 }
@@ -23,26 +24,6 @@ export function decodeJwtToken(token: string): JwtPayload {
 	} catch (error) {
 		console.error("Erro ao decodificar token JWT:", error);
 		throw new Error("Token JWT inválido");
-	}
-}
-
-/**
- * Extrai o role do token JWT
- * @param token - Token JWT
- * @returns Role do usuário ou "customer" como default
- */
-export function extractRoleFromToken(token: string): "partner" | "customer" {
-	try {
-		const payload = decodeJwtToken(token);
-		const role = payload.role?.toLowerCase();
-
-		if (role === "partner" || role === "customer") {
-			return role;
-		}
-
-		return "customer";
-	} catch {
-		return "customer";
 	}
 }
 

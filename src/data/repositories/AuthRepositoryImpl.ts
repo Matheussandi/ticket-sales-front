@@ -8,9 +8,11 @@ import type {
 	UpdateProfileData,
 	User,
 } from "../../domain/entities/User";
+
 import type { IAuthRepository } from "../../domain/repositories/IAuthRepository";
-import { extractRoleFromToken } from "../../domain/utils/jwtDecoder";
+import { decodeJwtToken } from "../../domain/utils/jwtDecoder";
 import type { HttpClient } from "../http/HttpClient";
+
 import type { TokenStorage } from "../storage/TokenStorage";
 
 /**
@@ -31,21 +33,20 @@ export class AuthRepositoryImpl implements IAuthRepository {
 			credentials,
 		);
 
-		const role = extractRoleFromToken(response.token);
+		const payload = decodeJwtToken(response.token);
 
-		const userWithRole: User = {
-			...response.user,
-			role,
+		const user: User = {
+			id: payload.id.toString(),
+			name: payload.name,
+			email: payload.email,
+			role: payload.role,
 		};
 
 		this.tokenStorage.saveToken(response.token);
-		this.tokenStorage.saveUser(userWithRole);
+		this.tokenStorage.saveUser(user);
 		this.httpClient.setToken(response.token);
 
-		return {
-			...response,
-			user: userWithRole,
-		};
+		return { token: response.token, user };
 	}
 
 	async register(data: RegisterData): Promise<AuthResponse> {
@@ -54,21 +55,19 @@ export class AuthRepositoryImpl implements IAuthRepository {
 			data,
 		);
 
-		const role = extractRoleFromToken(response.token);
-
-		const userWithRole: User = {
-			...response.user,
-			role,
+		const payload = decodeJwtToken(response.token);
+		const user: User = {
+			id: payload.id.toString(),
+			name: payload.name,
+			email: payload.email,
+			role: payload.role,
 		};
 
 		this.tokenStorage.saveToken(response.token);
-		this.tokenStorage.saveUser(userWithRole);
+		this.tokenStorage.saveUser(user);
 		this.httpClient.setToken(response.token);
 
-		return {
-			...response,
-			user: userWithRole,
-		};
+		return { token: response.token, user };
 	}
 
 	async registerPartner(data: RegisterPartnerData): Promise<AuthResponse> {
@@ -85,7 +84,6 @@ export class AuthRepositoryImpl implements IAuthRepository {
 			data,
 		);
 
-		// Transform to User entity
 		const user: User = {
 			id: response.user_id.toString(),
 			name: response.name,
@@ -95,11 +93,9 @@ export class AuthRepositoryImpl implements IAuthRepository {
 			createdAt: new Date(response.created_at),
 		};
 
-		// Note: The API doesn't return a token for partner registration
-		// We'll need to login after registration or adjust this based on actual API behavior
 		const authResponse: AuthResponse = {
 			user,
-			token: "", // TODO: Get token from API or perform login after registration
+			token: "",
 		};
 
 		this.tokenStorage.saveUser(user);
@@ -108,7 +104,6 @@ export class AuthRepositoryImpl implements IAuthRepository {
 	}
 
 	async registerCustomer(data: RegisterCustomerData): Promise<AuthResponse> {
-		// API response structure for customer registration
 		interface CustomerRegisterResponse {
 			id: number;
 			name: string;
@@ -123,7 +118,6 @@ export class AuthRepositoryImpl implements IAuthRepository {
 			data,
 		);
 
-		// Transform to User entity
 		const user: User = {
 			id: response.user_id.toString(),
 			name: response.name,
@@ -134,11 +128,9 @@ export class AuthRepositoryImpl implements IAuthRepository {
 			createdAt: new Date(response.created_at),
 		};
 
-		// Note: The API doesn't return a token for customer registration
-		// We'll need to login after registration or adjust this based on actual API behavior
 		const authResponse: AuthResponse = {
 			user,
-			token: "", // TODO: Get token from API or perform login after registration
+			token: "",
 		};
 
 		this.tokenStorage.saveUser(user);
@@ -171,7 +163,6 @@ export class AuthRepositoryImpl implements IAuthRepository {
 	async updateProfile(data: UpdateProfileData): Promise<User> {
 		const response = await this.httpClient.put<User>("/profile", data);
 
-		// Atualiza o usuário no storage
 		const currentUser = this.tokenStorage.getUser<User>();
 		const updatedUser: User = {
 			...(currentUser || {}),
