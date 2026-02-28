@@ -64,10 +64,6 @@ function LoginPage() {
     <div className="min-h-screen bg-background flex items-center justify-center px-6 py-12">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 mb-4">
-            <Ticket className="w-8 h-8" />
-            <span className="text-2xl font-bold">TicketHub</span>
-          </div>
           <h1 className="text-3xl font-bold mb-2">Bem-vindo de volta!</h1>
           <p className="text-muted-foreground">Entre na sua conta para continuar</p>
         </div>
