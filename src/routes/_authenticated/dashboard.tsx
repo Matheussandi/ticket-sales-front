@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { Calendar, DollarSign, Ticket, TrendingUp } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import {
 	Card,
 	CardContent,
@@ -156,14 +155,11 @@ function DashboardPage() {
 									<TableHead>Nome</TableHead>
 									<TableHead>Data</TableHead>
 									<TableHead>Localização</TableHead>
-									<TableHead>Status</TableHead>
 								</TableRow>
 							</TableHeader>
 							<TableBody>
 								{recentEvents.map((event) => {
 									const eventDate = new Date(event.date);
-									const now = new Date();
-									const isUpcoming = eventDate > now;
 
 									return (
 										<TableRow key={event.id}>
@@ -176,11 +172,6 @@ function DashboardPage() {
 												})}
 											</TableCell>
 											<TableCell>{event.location}</TableCell>
-											<TableCell>
-												<Badge variant={isUpcoming ? "default" : "secondary"}>
-													{isUpcoming ? "Próximo" : "Realizado"}
-												</Badge>
-											</TableCell>
 										</TableRow>
 									);
 								})}

@@ -2,7 +2,6 @@ import { Link, useMatchRoute, useRouter } from "@tanstack/react-router";
 import { Calendar, Home, LogOut, Ticket, User } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import {
 	Sidebar,
 	SidebarContent,
@@ -17,7 +16,6 @@ import {
 	useSidebar,
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/AuthContext";
-import { useRole } from "@/hooks/useRole";
 
 const menuItemsByRole = {
 	partner: [
@@ -61,9 +59,11 @@ const menuItemsByRole = {
  */
 export function AppSidebar() {
 	const { user, logout } = useAuth();
+	const role = user?.role || "customer";
+
 	const matchRoute = useMatchRoute();
-	const role = useRole();
 	const { isMobile, setOpenMobile } = useSidebar();
+	
 	const router = useRouter();
 
 	const menuItems = menuItemsByRole[role];
@@ -121,7 +121,6 @@ export function AppSidebar() {
 					<p className="text-sm font-medium">{user?.name}</p>
 					<p className="text-xs text-muted-foreground">{user?.email}</p>
 				</div>
-				<Separator className="mb-3" />
 				<Button
 					onClick={handleLogout}
 					variant="ghost"

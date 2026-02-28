@@ -40,16 +40,18 @@ function LoginPage() {
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      await login({
+      const user = await login({
         email: data.email,
         password: data.password,
       })
       
       toast.success('Login realizado com sucesso!')
-      // Login bem-sucedido, redireciona para dashboard
-      navigate({ to: '/dashboard' })
+      
+      const userRole = user.role || 'customer'
+      const redirectTo = userRole === 'partner' ? '/dashboard' : '/events'
+
+      navigate({ to: redirectTo })
     } catch (error) {
-      // Exibe erro no formulário
       const errorMessage = error instanceof Error ? error.message : 'Erro ao fazer login'
       setError('root', {
         message: errorMessage,
@@ -62,10 +64,6 @@ function LoginPage() {
     <div className="min-h-screen bg-background flex items-center justify-center px-6 py-12">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 mb-4">
-            <Ticket className="w-8 h-8" />
-            <span className="text-2xl font-bold">TicketHub</span>
-          </div>
           <h1 className="text-3xl font-bold mb-2">Bem-vindo de volta!</h1>
           <p className="text-muted-foreground">Entre na sua conta para continuar</p>
         </div>

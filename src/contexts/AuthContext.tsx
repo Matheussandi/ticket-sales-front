@@ -5,24 +5,24 @@ import {
 	useEffect,
 	useState,
 } from "react";
+
 import { tokenStorage } from "../data/di/container";
-import type { 
-	LoginCredentials, 
+
+import type {
+	LoginCredentials,
 	RegisterCustomerData,
-	RegisterData, 
+	RegisterData,
 	RegisterPartnerData,
-	User 
+	User,
 } from "../domain/entities/User";
+
 import type { AuthService } from "../domain/services/AuthService";
 
-/**
- * Auth Context State
- */
 interface AuthContextData {
 	user: User | null;
 	isAuthenticated: boolean;
 	isLoading: boolean;
-	login: (credentials: LoginCredentials) => Promise<void>;
+	login: (credentials: LoginCredentials) => Promise<User>;
 	register: (data: RegisterData) => Promise<void>;
 	registerPartner: (data: RegisterPartnerData) => Promise<void>;
 	registerCustomer: (data: RegisterCustomerData) => Promise<void>;
@@ -30,9 +30,6 @@ interface AuthContextData {
 	updateUser: (user: User) => void;
 }
 
-/**
- * Auth Provider Props
- */
 interface AuthProviderProps {
 	children: ReactNode;
 	authService: AuthService;
@@ -40,19 +37,10 @@ interface AuthProviderProps {
 
 const AuthContext = createContext<AuthContextData | undefined>(undefined);
 
-/**
- * Auth Provider Component
- *
- * Gerencia estado global de autenticação usando Context API.
- * Recebe AuthService via injeção de dependência.
- */
 export function AuthProvider({ children, authService }: AuthProviderProps) {
 	const [user, setUser] = useState<User | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 
-	/**
-	 * Inicialização: verifica se existe sessão ativa
-	 */
 	useEffect(() => {
 		const initAuth = async () => {
 			try {
@@ -60,12 +48,10 @@ export function AuthProvider({ children, authService }: AuthProviderProps) {
 				const hasToken = tokenStorage.hasToken();
 
 				if (storedUser && hasToken) {
-					// Valida token no servidor
 					const isValid = await authService.validateToken();
 					if (isValid) {
 						setUser(storedUser);
 					} else {
-						// Token inválido, limpa dados
 						tokenStorage.clear();
 					}
 				}
@@ -80,22 +66,17 @@ export function AuthProvider({ children, authService }: AuthProviderProps) {
 		initAuth();
 	}, [authService]);
 
-	/**
-	 * Realiza login
-	 */
-	const login = async (credentials: LoginCredentials): Promise<void> => {
+	const login = async (credentials: LoginCredentials): Promise<User> => {
 		setIsLoading(true);
 		try {
 			const response = await authService.login(credentials);
 			setUser(response.user);
+			return response.user;
 		} finally {
 			setIsLoading(false);
 		}
 	};
 
-	/**
-	 * Registra novo usuário
-	 */
 	const register = async (data: RegisterData): Promise<void> => {
 		setIsLoading(true);
 		try {
@@ -106,18 +87,13 @@ export function AuthProvider({ children, authService }: AuthProviderProps) {
 		}
 	};
 
-	/**
-	 * Registra novo parceiro
-	 */
 	const registerPartner = async (data: RegisterPartnerData): Promise<void> => {
 		setIsLoading(true);
 		try {
 			const response = await authService.registerPartner(data);
-			// After successful registration, perform login
 			if (response.token) {
 				setUser(response.user);
 			} else {
-				// If no token returned, perform login
 				await login({ email: data.email, password: data.password });
 			}
 		} finally {
@@ -125,18 +101,15 @@ export function AuthProvider({ children, authService }: AuthProviderProps) {
 		}
 	};
 
-	/**
-	 * Registra novo cliente
-	 */
-	const registerCustomer = async (data: RegisterCustomerData): Promise<void> => {
+	const registerCustomer = async (
+		data: RegisterCustomerData,
+	): Promise<void> => {
 		setIsLoading(true);
 		try {
 			const response = await authService.registerCustomer(data);
-			// After successful registration, perform login
 			if (response.token) {
 				setUser(response.user);
 			} else {
-				// If no token returned, perform login
 				await login({ email: data.email, password: data.password });
 			}
 		} finally {
@@ -144,9 +117,6 @@ export function AuthProvider({ children, authService }: AuthProviderProps) {
 		}
 	};
 
-	/**
-	 * Faz logout
-	 */
 	const logout = async (): Promise<void> => {
 		setIsLoading(true);
 		try {
@@ -157,9 +127,6 @@ export function AuthProvider({ children, authService }: AuthProviderProps) {
 		}
 	};
 
-	/**
-	 * Atualiza dados do usuário
-	 */
 	const updateUser = (updatedUser: User): void => {
 		setUser(updatedUser);
 	};
@@ -179,12 +146,6 @@ export function AuthProvider({ children, authService }: AuthProviderProps) {
 	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-/**
- * useAuth Hook
- *
- * Hook para acessar contexto de autenticação.
- * @throws {Error} Se usado fora do AuthProvider
- */
 export function useAuth(): AuthContextData {
 	const context = useContext(AuthContext);
 	if (!context) {
@@ -193,18 +154,11 @@ export function useAuth(): AuthContextData {
 	return context;
 }
 
-/**
- * useRequireAuth Hook
- *
- * Hook para componentes que exigem autenticação.
- * Redireciona para login se não autenticado.
- */
 export function useRequireAuth() {
 	const auth = useAuth();
 
 	useEffect(() => {
 		if (!auth.isLoading && !auth.isAuthenticated) {
-			// Redirecionar para login
 			window.location.href = "/login";
 		}
 	}, [auth.isLoading, auth.isAuthenticated]);

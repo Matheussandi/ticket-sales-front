@@ -24,23 +24,24 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { useAuth } from "@/contexts/AuthContext";
 import type { Event, EventFilters } from "@/domain/entities/Event";
 import { useEventList } from "@/hooks/queries/useEventList";
 import { useAvailableTicketsCount } from "@/hooks/queries/useTicketsByEvent";
 import { useDebounce } from "@/hooks/useDebounce";
-import { useIsCustomer, useIsPartner } from "@/hooks/useRole";
 
 export const Route = createFileRoute("/_authenticated/events/")({
 	component: EventsPage,
 });
 
 function EventsPage() {
+	const { user } = useAuth();
+	const isPartner = user?.role === "partner";
+	const isCustomer = user?.role === "customer";
+
 	const nameFilterId = useId();
 	const dateFilterId = useId();
 	const locationFilterId = useId();
-
-	const isPartner = useIsPartner();
-	const isCustomer = useIsCustomer();
 
 	const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 	const [purchaseEvent, setPurchaseEvent] = useState<Event | null>(null);

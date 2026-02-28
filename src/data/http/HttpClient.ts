@@ -44,11 +44,10 @@ export class HttpClient {
 		this.axiosInstance.interceptors.response.use(
 			(response) => response,
 			async (error) => {
-				// Token expirado ou inválido
 				if (error.response?.status === 401) {
 					this.clearStoredToken();
-					// Opcionalmente: redirecionar para login
-					// window.location.href = '/login';
+					localStorage.removeItem("@tickethub:user");
+					window.location.href = '/login';
 				}
 
 				// Personaliza mensagens de erro

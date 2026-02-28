@@ -1,24 +1,22 @@
 import { z } from "zod";
-import { eventSchema } from "./Event";
-import { ticketSchema } from "./Ticket";
+import { ticketWithEventSchema } from "./Ticket";
 
 /**
  * Schema para compra retornada pela API
  */
 export const purchaseSchema = z.object({
   id: z.number(),
-  customer_id: z.number(),
+  customer_id: z.number().optional(), // Não retornado pelo endpoint de listagem
   purchase_date: z.coerce.date(),
-  total_amount: z.string(), // API retorna como string (decimal)
+  total_amount: z.coerce.number(), // API pode retornar como string ou number
   status: z.enum(["paid", "pending", "cancelled"]),
 });
 
 /**
- * Schema para compra com detalhes (evento e tickets)
+ * Schema para compra com detalhes (tickets com eventos aninhados)
  */
 export const purchaseWithDetailsSchema = purchaseSchema.extend({
-  event: eventSchema.optional(),
-  tickets: z.array(ticketSchema).optional(),
+  tickets: z.array(ticketWithEventSchema).optional(),
 });
 
 /**
