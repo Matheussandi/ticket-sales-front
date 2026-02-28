@@ -16,8 +16,7 @@ export class PurchaseRepositoryImpl implements IPurchaseRepository {
 
   async createPurchase(data: CreatePurchasePayload): Promise<Purchase> {
     const response = await this.httpClient.post<Purchase>("/purchases", data);
-
-    // Validação com Zod
+    
     const validatedPurchase = purchaseSchema.parse(response);
     return validatedPurchase;
   }
@@ -25,7 +24,6 @@ export class PurchaseRepositoryImpl implements IPurchaseRepository {
   async getMyPurchases(): Promise<PurchaseWithDetails[]> {
     const response = await this.httpClient.get<PurchaseWithDetails[]>("/purchases");
 
-    // Validação com Zod
     const validatedPurchases = purchaseListSchema.parse(response);
     return validatedPurchases;
   }
