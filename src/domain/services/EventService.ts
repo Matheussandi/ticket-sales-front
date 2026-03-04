@@ -43,6 +43,16 @@ export class EventService {
 		}
 	}
 
+	async getEventById(id: number): Promise<Event> {
+		try {
+			return await this.eventRepository.getEventById(id);
+		} catch (error) {
+			throw new Error(
+				error instanceof Error ? error.message : "Erro ao buscar evento",
+			);
+		}
+	}
+
 	async createEvent(data: CreateEventPayload): Promise<Event> {
 		try {
 			// Validação adicional: data não pode ser no passado

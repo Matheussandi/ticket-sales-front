@@ -1,9 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Calendar, MapPin, Plus, Search, Ticket } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Calendar, Eye, MapPin, Plus, Search, Ticket } from "lucide-react";
 import { useId, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { CreateEventDialog } from "@/components/events/CreateEventDialog";
-import { PurchaseTicketDialog } from "@/components/events/PurchaseTicketDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -44,7 +43,6 @@ function EventsPage() {
 	const locationFilterId = useId();
 
 	const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-	const [purchaseEvent, setPurchaseEvent] = useState<Event | null>(null);
 
 	const { control, watch, reset } = useForm<EventFilters>({
 		defaultValues: {
@@ -209,9 +207,7 @@ function EventsPage() {
 									<TableHead>Status</TableHead>
 									{isCustomer && <TableHead>Ingressos</TableHead>}
 									{isPartner && <TableHead>Criado em</TableHead>}
-									{isCustomer && (
-										<TableHead className="text-right">Ações</TableHead>
-									)}
+									<TableHead className="text-right">Ações</TableHead>
 								</TableRow>
 							</TableHeader>
 							<TableBody>
@@ -221,7 +217,6 @@ function EventsPage() {
 										event={event}
 										isCustomer={isCustomer}
 										isPartner={isPartner}
-										onPurchaseClick={() => setPurchaseEvent(event)}
 									/>
 								))}
 							</TableBody>
@@ -236,14 +231,6 @@ function EventsPage() {
 				onOpenChange={setIsCreateDialogOpen}
 			/>
 
-			{/* Purchase Ticket Dialog */}
-			{purchaseEvent && (
-				<PurchaseTicketDialog
-					open={!!purchaseEvent}
-					onOpenChange={(open) => !open && setPurchaseEvent(null)}
-					event={purchaseEvent}
-				/>
-			)}
 		</div>
 	);
 }
@@ -253,14 +240,12 @@ interface EventTableRowProps {
 	event: Event;
 	isCustomer: boolean;
 	isPartner: boolean;
-	onPurchaseClick: () => void;
 }
 
 function EventTableRow({
 	event,
 	isCustomer,
 	isPartner,
-	onPurchaseClick,
 }: EventTableRowProps) {
 	const eventDate = new Date(event.date);
 	const now = new Date();
@@ -307,18 +292,17 @@ function EventTableRow({
 					{new Date(event.created_at).toLocaleDateString("pt-BR")}
 				</TableCell>
 			)}
-			{isCustomer && (
-				<TableCell className="text-right">
-					<Button
-						size="sm"
-						onClick={onPurchaseClick}
-						disabled={!isUpcoming || (availableCount ?? 0) === 0}
+			<TableCell className="text-right">
+				<Button size="sm" variant="outline" asChild>
+					<Link
+					to="/events/$eventId"
+						params={{ eventId: String(event.id) }}
 					>
-						<Ticket className="mr-2 h-4 w-4" />
-						Comprar
-					</Button>
-				</TableCell>
-			)}
+						<Eye className="mr-2 h-4 w-4" />
+						Visualizar
+					</Link>
+				</Button>
+			</TableCell>
 		</TableRow>
 	);
 }

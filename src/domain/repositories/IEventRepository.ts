@@ -12,5 +12,6 @@ import type {
  */
 export interface IEventRepository {
 	listEvents(filters?: EventFilters): Promise<Event[]>;
+	getEventById(id: number): Promise<Event>;
 	createEvent(data: CreateEventPayload): Promise<Event>;
 }
