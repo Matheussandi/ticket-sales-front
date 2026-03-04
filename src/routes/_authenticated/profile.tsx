@@ -30,6 +30,7 @@ import {
 } from "@/domain/entities/User";
 import { useUpdatePassword } from "@/hooks/mutations/useUpdatePassword";
 import { useUpdateProfile } from "@/hooks/mutations/useUpdateProfile";
+import { formatPhone } from "@/utils/formatters";
 
 export const Route = createFileRoute("/_authenticated/profile")({
 	component: ProfilePage,
@@ -47,6 +48,7 @@ function ProfilePage() {
 		defaultValues: {
 			name: user?.name || "",
 			email: user?.email || "",
+			phone: user?.phone || "",
 		},
 	});
 
@@ -142,7 +144,26 @@ function ProfilePage() {
 									</FormItem>
 								)}
 							/>
-
+						<FormField
+							control={profileForm.control}
+							name="phone"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Telefone</FormLabel>
+									<FormControl>
+										<Input
+											type="tel"
+											inputMode="numeric"
+											maxLength={15}
+											placeholder="(11) 99999-9999"
+											{...field}
+											onChange={(e) => field.onChange(formatPhone(e.target.value))}
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
 							<div className="flex justify-end">
 								<Button
 									type="submit"

@@ -42,6 +42,11 @@ export class EventRepositoryImpl implements IEventRepository {
 		return validatedEvents;
 	}
 
+	async getEventById(id: number): Promise<Event> {
+		const response = await this.httpClient.get<Event>(`/events/${id}`);
+		return eventSchema.parse(response);
+	}
+
 	async createEvent(data: CreateEventPayload): Promise<Event> {
 		const response = await this.httpClient.post<Event>("/events", data);
 

@@ -1,8 +1,4 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useId } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { z } from "zod";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -12,209 +8,173 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
 import type { Event } from "@/domain/entities/Event";
-import { usePurchaseTickets } from "@/hooks/mutations/usePurchaseTickets";
+import type { Ticket } from "@/domain/entities/Ticket";
 import { useTicketsByEvent } from "@/hooks/queries/useTicketsByEvent";
+import { formatCurrency } from "@/utils/formatters";
 
-// Schema para o formulário de compra
-const purchaseFormSchema = z.object({
-	quantity: z.string().min(1, "Selecione pelo menos 1 ticket"),
-	card_token: z.string().min(1, "Selecione um método de pagamento"),
-});
-
-type PurchaseFormData = z.infer<typeof purchaseFormSchema>;
-
-interface PurchaseTicketDialogProps {
+interface SeatSelectionDialogProps {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 	event: Event;
+	onConfirm: (tickets: Ticket[]) => void;
 }
 
-// Opções de métodos de pagamento (tokens mock)
-const PAYMENT_METHODS = [
-	{ value: "tok_visa", label: "Visa •••• 4242" },
-	{ value: "tok_mastercard", label: "Mastercard •••• 5555" },
-	{ value: "tok_amex", label: "American Express •••• 0005" },
-];
+function SeatButton({
+	ticket,
+	selected,
+	onToggle,
+}: {
+	ticket: Ticket;
+	selected: boolean;
+	onToggle: (id: number) => void;
+}) {
+	const isUnavailable = ticket.status !== "available";
 
-export function PurchaseTicketDialog({
+	return (
+		<button
+			type="button"
+			disabled={isUnavailable}
+			onClick={() => onToggle(ticket.id)}
+			title={
+				isUnavailable
+					? `Poltrona ${ticket.location} — ${ticket.status === "sold" ? "vendida" : "reservada"}`
+					: `Poltrona ${ticket.location} — ${formatCurrency(ticket.price)}`
+			}
+			className={[
+				"w-10 h-10 rounded text-xs font-semibold border-2 transition-colors",
+				isUnavailable
+					? "bg-muted text-muted-foreground border-muted cursor-not-allowed opacity-50"
+					: selected
+						? "bg-primary text-primary-foreground border-primary"
+						: "bg-background text-foreground border-border hover:border-primary hover:bg-primary/10",
+			].join(" ")}
+		>
+			{ticket.location}
+		</button>
+	);
+}
+
+export function SeatSelectionDialog({
 	open,
 	onOpenChange,
 	event,
-}: PurchaseTicketDialogProps) {
-	const quantityId = useId();
+	onConfirm,
+}: SeatSelectionDialogProps) {
+	const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
 	const { data: tickets, isLoading: loadingTickets } = useTicketsByEvent(
 		event.id,
 	);
-	const purchaseTickets = usePurchaseTickets();
 
-	const availableTickets =
-		tickets?.filter((t) => t.status === "available") || [];
-	const ticketPrice = tickets?.[0]?.price || "0";
+	const allTickets = tickets || [];
+	const availableCount = allTickets.filter((t) => t.status === "available").length;
 
-	const {
-		register,
-		handleSubmit,
-		formState: { errors, isSubmitting },
-		reset,
-		watch,
-		setValue,
-	} = useForm<PurchaseFormData>({
-		resolver: zodResolver(purchaseFormSchema),
-		defaultValues: {
-			quantity: "1",
-			card_token: "",
-		},
-	});
+	const toggleSeat = (id: number) => {
+		setSelectedIds((prev) =>
+			prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id],
+		);
+	};
 
-	const quantity = watch("quantity");
-	const quantityNum = quantity ? Number(quantity) : 0;
-	const totalAmount = (Number(ticketPrice) * quantityNum).toFixed(2);
-
-	const onSubmit = async (data: PurchaseFormData) => {
-		try {
-			const quantity = Number(data.quantity);
-
-			// Seleciona os primeiros N tickets disponíveis
-			const selectedTickets = availableTickets
-				.slice(0, quantity)
-				.map((t) => t.id);
-
-			if (selectedTickets.length < quantity) {
-				toast.error("Não há tickets suficientes disponíveis");
-				return;
-			}
-
-			await purchaseTickets.mutateAsync({
-				ticket_ids: selectedTickets,
-				card_token: data.card_token,
-			});
-
-			toast.success(
-				`Compra realizada com sucesso! Total: R$ ${totalAmount}`,
-			);
-			reset();
-			onOpenChange(false);
-		} catch (error) {
-			toast.error(
-				error instanceof Error ? error.message : "Erro ao processar compra",
-			);
-		}
+	const handleConfirm = () => {
+		const selectedTickets = allTickets.filter((t) =>
+			selectedIds.includes(t.id),
+		);
+		onConfirm(selectedTickets);
+		setSelectedIds([]);
 	};
 
 	const handleClose = () => {
-		reset();
+		setSelectedIds([]);
 		onOpenChange(false);
 	};
 
 	return (
 		<Dialog open={open} onOpenChange={handleClose}>
-			<DialogContent className="sm:max-w-[425px]">
+			<DialogContent className="sm:max-w-[500px]">
 				<DialogHeader>
-					<DialogTitle>Comprar Ingressos</DialogTitle>
+					<DialogTitle>Selecionar Poltronas</DialogTitle>
 					<DialogDescription>{event.name}</DialogDescription>
 				</DialogHeader>
 
 				{loadingTickets ? (
 					<div className="py-8 text-center text-muted-foreground">
-						Carregando ingressos...
+						Carregando poltronas...
 					</div>
-				) : availableTickets.length === 0 ? (
+				) : availableCount === 0 ? (
 					<div className="py-8 text-center text-muted-foreground">
 						Não há ingressos disponíveis para este evento.
 					</div>
 				) : (
-					<form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-						<div className="rounded-lg bg-muted p-4 space-y-1">
-							<p className="text-sm text-muted-foreground">
-								Ingressos disponíveis:{" "}
-								<span className="font-semibold text-foreground">
-									{availableTickets.length}
-								</span>
-							</p>
-							<p className="text-sm text-muted-foreground">
-								Preço unitário:{" "}
-								<span className="font-semibold text-foreground">
-									R$ {Number(ticketPrice).toFixed(2)}
-								</span>
-							</p>
+					<div className="space-y-4">
+						{/* Legenda */}
+						<div className="flex items-center gap-4 text-xs text-muted-foreground">
+							<span className="flex items-center gap-1.5">
+								<span className="inline-block w-4 h-4 rounded border-2 border-border bg-background" />
+								Disponível
+							</span>
+							<span className="flex items-center gap-1.5">
+								<span className="inline-block w-4 h-4 rounded border-2 border-primary bg-primary" />
+								Selecionado
+							</span>
+							<span className="flex items-center gap-1.5">
+								<span className="inline-block w-4 h-4 rounded border-2 border-muted bg-muted opacity-50" />
+								Indisponível
+							</span>
 						</div>
 
+						{/* Mapa de poltronas */}
 						<div className="space-y-2">
-							<Label htmlFor={quantityId}>
-								Quantidade <span className="text-destructive">*</span>
-							</Label>
-							<Input
-								id={quantityId}
-								type="number"
-								min="1"
-								max={availableTickets.length}
-								placeholder="1"
-								{...register("quantity")}
-							/>
-							{errors.quantity && (
-								<p className="text-sm text-destructive">
-									{errors.quantity.message}
-								</p>
-							)}
-						</div>
-
-						<div className="space-y-2">
-							<Label>
-								Método de Pagamento <span className="text-destructive">*</span>
-							</Label>
-							<Select
-								onValueChange={(value) => setValue("card_token", value)}
-								defaultValue=""
-							>
-								<SelectTrigger>
-									<SelectValue placeholder="Selecione o cartão" />
-								</SelectTrigger>
-								<SelectContent>
-									{PAYMENT_METHODS.map((method) => (
-										<SelectItem key={method.value} value={method.value}>
-											{method.label}
-										</SelectItem>
+							<Label>Clique nas poltronas para selecioná-las</Label>
+							<div className="rounded-lg border bg-muted/20 p-4">
+								<div className="mb-4 rounded bg-muted py-1 text-center text-xs text-muted-foreground">
+									PALCO
+								</div>
+								<div className="flex flex-wrap gap-2 justify-center">
+									{allTickets.map((ticket) => (
+										<SeatButton
+											key={ticket.id}
+											ticket={ticket}
+											selected={selectedIds.includes(ticket.id)}
+											onToggle={toggleSeat}
+										/>
 									))}
-								</SelectContent>
-							</Select>
-							{errors.card_token && (
-								<p className="text-sm text-destructive">
-									{errors.card_token.message}
-								</p>
-							)}
+								</div>
+							</div>
 						</div>
 
-						<div className="rounded-lg bg-primary/10 p-4">
-							<p className="text-lg font-semibold">
-								Total: R$ {totalAmount}
-							</p>
+						{/* Resumo da seleção */}
+						<div className="rounded-lg bg-muted p-3 space-y-1 text-sm">
+							<div className="flex justify-between text-muted-foreground">
+								<span>Poltronas selecionadas</span>
+								<span className="font-medium text-foreground">
+									{selectedIds.length}
+								</span>
+							</div>
+							{selectedIds.length > 0 && (
+								<div className="flex justify-between text-muted-foreground">
+									<span>Preço unitário</span>
+									<span className="font-medium text-foreground">
+										{formatCurrency(allTickets.find((t) => t.id === selectedIds[0])?.price ?? 0)}
+									</span>
+								</div>
+							)}
 						</div>
 
 						<DialogFooter>
-							<Button
-								type="button"
-								variant="outline"
-								onClick={handleClose}
-								disabled={isSubmitting}
-							>
+							<Button type="button" variant="outline" onClick={handleClose}>
 								Cancelar
 							</Button>
-							<Button type="submit" disabled={isSubmitting}>
-								{isSubmitting ? "Processando..." : "Confirmar Compra"}
+							<Button
+								type="button"
+								disabled={selectedIds.length === 0}
+								onClick={handleConfirm}
+							>
+								Confirmar Seleção ({selectedIds.length})
 							</Button>
 						</DialogFooter>
-					</form>
+					</div>
 				)}
 			</DialogContent>
 		</Dialog>

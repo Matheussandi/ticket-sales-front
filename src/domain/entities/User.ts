@@ -108,7 +108,7 @@ export const forgotPasswordSchema = z.object({
 		
 });
 
-// Schema para atualização de perfil (nome e email)
+// Schema para atualização de perfil (nome, email e telefone)
 export const updateProfileSchema = z.object({
 	name: z
 		.string()
@@ -118,6 +118,7 @@ export const updateProfileSchema = z.object({
 		.string()
 		.min(1, "Email é obrigatório")
 		.email("Email inválido"),
+	phone: z.string().optional(),
 });
 
 // Schema para atualização de senha
