@@ -102,7 +102,7 @@ export function CreateEventDialog({
 				<DialogHeader>
 					<DialogTitle>Criar Novo Evento</DialogTitle>
 					<DialogDescription>
-						Preencha os dados do evento. Clique em salvar quando terminar.
+						Preencha os dados do evento
 					</DialogDescription>
 				</DialogHeader>
 

@@ -18,6 +18,21 @@ export function formatPhone(value: string): string {
 }
 
 /**
+ * Formata um valor numérico como moeda brasileira (BRL)
+ *
+ * @example
+ * formatCurrency(1990)     // "R$ 1.990,00"
+ * formatCurrency(49.9)     // "R$ 49,90"
+ * formatCurrency(0)        // "R$ 0,00"
+ */
+export function formatCurrency(value: number): string {
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(value);
+}
+
+/**
  * Formata uma data no padrão DD/MM/AAAA
  *
  * Aceita apenas dígitos, limita a 8 dígitos e aplica a máscara

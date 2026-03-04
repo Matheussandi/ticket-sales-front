@@ -21,11 +21,12 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { PAYMENT_METHODS } from "@/constants/paymentMethods";
 import type { Event } from "@/domain/entities/Event";
 import { usePurchaseTickets } from "@/hooks/mutations/usePurchaseTickets";
 import { useTicketsByEvent } from "@/hooks/queries/useTicketsByEvent";
+import { formatCurrency } from "@/utils/formatters";
 
-// Schema para o formulário de compra
 const purchaseFormSchema = z.object({
 	quantity: z.string().min(1, "Selecione pelo menos 1 ticket"),
 	card_token: z.string().min(1, "Selecione um método de pagamento"),
@@ -38,13 +39,6 @@ interface PurchaseTicketDialogProps {
 	onOpenChange: (open: boolean) => void;
 	event: Event;
 }
-
-// Opções de métodos de pagamento (tokens mock)
-const PAYMENT_METHODS = [
-	{ value: "tok_visa", label: "Visa •••• 4242" },
-	{ value: "tok_mastercard", label: "Mastercard •••• 5555" },
-	{ value: "tok_amex", label: "American Express •••• 0005" },
-];
 
 export function PurchaseTicketDialog({
 	open,
@@ -79,7 +73,7 @@ export function PurchaseTicketDialog({
 
 	const quantity = watch("quantity");
 	const quantityNum = quantity ? Number(quantity) : 0;
-	const totalAmount = (Number(ticketPrice) * quantityNum).toFixed(2);
+	const totalAmount = Number(ticketPrice) * quantityNum;
 
 	const onSubmit = async (data: PurchaseFormData) => {
 		try {
@@ -101,7 +95,7 @@ export function PurchaseTicketDialog({
 			});
 
 			toast.success(
-				`Compra realizada com sucesso! Total: R$ ${totalAmount}`,
+				`Compra realizada com sucesso! Total: ${formatCurrency(totalAmount)}`,
 			);
 			reset();
 			onOpenChange(false);
@@ -145,7 +139,7 @@ export function PurchaseTicketDialog({
 							<p className="text-sm text-muted-foreground">
 								Preço unitário:{" "}
 								<span className="font-semibold text-foreground">
-									R$ {Number(ticketPrice).toFixed(2)}
+								{formatCurrency(Number(ticketPrice))}
 								</span>
 							</p>
 						</div>
@@ -197,7 +191,7 @@ export function PurchaseTicketDialog({
 
 						<div className="rounded-lg bg-primary/10 p-4">
 							<p className="text-lg font-semibold">
-								Total: R$ {totalAmount}
+								Total: {formatCurrency(totalAmount)}
 							</p>
 						</div>
 

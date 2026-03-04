@@ -1,9 +1,6 @@
 import { z } from "zod";
 import { ticketWithEventSchema } from "./Ticket";
 
-/**
- * Schema para compra retornada pela API
- */
 export const purchaseSchema = z.object({
   id: z.number(),
   customer_id: z.number().optional(), // Não retornado pelo endpoint de listagem
@@ -12,9 +9,6 @@ export const purchaseSchema = z.object({
   status: z.enum(["paid", "pending", "cancelled"]),
 });
 
-/**
- * Schema para compra com detalhes (tickets com eventos aninhados)
- */
 export const purchaseWithDetailsSchema = purchaseSchema.extend({
   tickets: z.array(ticketWithEventSchema).optional(),
 });
@@ -24,9 +18,6 @@ export const purchaseWithDetailsSchema = purchaseSchema.extend({
  */
 export const purchaseListSchema = z.array(purchaseWithDetailsSchema);
 
-/**
- * Schema para criação de compra
- */
 export const createPurchaseSchema = z.object({
   ticket_ids: z
     .array(z.number())
@@ -34,9 +25,6 @@ export const createPurchaseSchema = z.object({
   card_token: z.string().min(1, "Selecione um método de pagamento"),
 });
 
-/**
- * Tipos derivados dos schemas
- */
 export type Purchase = z.infer<typeof purchaseSchema>;
 export type PurchaseWithDetails = z.infer<typeof purchaseWithDetailsSchema>;
 export type CreatePurchasePayload = z.infer<typeof createPurchaseSchema>;
