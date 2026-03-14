@@ -1,0 +1,54 @@
+---
+description: Padroes de formularios com React Hook Form e Zod
+globs: **/*.tsx
+alwaysApply: false
+---
+
+# Formularios
+
+## Stack: React Hook Form + Zod + shadcn
+
+### Padrao
+
+1. Schema Zod em `src/domain/entities/` (schema primeiro, type derivado)
+2. `useForm` com `zodResolver`
+3. Componentes shadcn/ui para inputs (`Input`, `Label`, `Button`)
+4. `useId()` para IDs acessiveis
+
+```tsx
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { type MyFormData, mySchema } from "@/domain/entities/MyEntity";
+
+function MyForm() {
+  const id = useId();
+  const { register, handleSubmit, formState: { errors } } = useForm<MyFormData>({
+    resolver: zodResolver(mySchema),
+  });
+
+  const onSubmit = async (data: MyFormData) => {
+    // usar mutation hook
+  };
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <Label htmlFor={`${id}-name`}>
+        Nome <span className="text-destructive">*</span>
+      </Label>
+      <Input id={`${id}-name`} {...register("name")} />
+      {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
+      <Button type="submit">Salvar</Button>
+    </form>
+  );
+}
+```
+
+### Convencoes
+
+- Schemas Zod ficam em `domain/entities/`, nunca em componentes
+- Use `z.coerce.number()` para campos numericos de formularios HTML
+- Use `z.coerce.date()` para campos datetime-local
+- Valide datas futuras no Service, nao no schema
+- Use `Controller` ou `register` conforme necessidade do componente
+- Reset formulario apos sucesso com `reset()`
+- Feedback via `toast` do Sonner (sucesso/erro)

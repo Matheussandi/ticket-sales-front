@@ -1,0 +1,51 @@
+---
+description: Camada de dados - repositories, HttpClient, DI container
+globs: **/data/**
+alwaysApply: false
+---
+
+# Data Layer
+
+## HttpClient (`src/data/http/HttpClient.ts`)
+
+Wrapper Axios com:
+- Base URL e timeout de `src/config/env.ts`
+- Interceptor request: adiciona `Authorization: Bearer <token>`
+- Interceptor response: trata 401 (remove token, redireciona login)
+
+## Repositories
+
+Implementam interfaces de `domain/repositories/`. Padrao:
+
+```typescript
+export class EventRepositoryImpl implements IEventRepository {
+  constructor(private httpClient: HttpClient) {}
+
+  async getAll(): Promise<Event[]> {
+    return await this.httpClient.get<Event[]>("/events");
+  }
+}
+```
+
+- Valide responses com schemas Zod quando necessario
+- Use `TokenStorage` para persistir tokens (nunca localStorage direto)
+- Trate transformacoes de dados (DTOs) aqui
+
+## DI Container (`src/data/di/container.ts`)
+
+Singleton: cria instancias na ordem `infrastructure → repositories → services`.
+
+```typescript
+const httpClient = new HttpClient();
+const tokenStorage = new TokenStorage();
+const myRepository = new MyRepositoryImpl(httpClient);
+export const myService = new MyService(myRepository);
+```
+
+Sempre registre novas dependencias aqui.
+
+## Variaveis de ambiente
+
+Configuradas em `src/config/env.ts` com validacao type-safe. Acesse via `env.apiBaseUrl`, nunca `import.meta.env` direto.
+
+Para endpoints e tratamento de erros, consulte `docs/api-integration.md`.

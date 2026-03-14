@@ -1,0 +1,36 @@
+---
+description: Modulo de perfil do usuario
+globs: **/profile**
+alwaysApply: false
+---
+
+# Modulo de Perfil
+
+## Funcionalidades
+
+1. **Atualizacao de dados pessoais** (nome, email) via `PUT /profile`
+2. **Alteracao de senha** via `PUT /profile/password`
+
+## Arquivos principais
+
+- Schemas: `updateProfileSchema`, `updatePasswordSchema` em `src/domain/entities/User.ts`
+- Repository: `IAuthRepository.updateProfile()`, `IAuthRepository.updatePassword()`
+- Service: `AuthService.updateProfile()`, `AuthService.updatePassword()`
+- Hooks: `src/hooks/mutations/useUpdateProfile.ts`, `src/hooks/mutations/useUpdatePassword.ts`
+- UI: `src/routes/_authenticated/profile.tsx` (dois cards: dados pessoais + seguranca)
+
+## Validacoes
+
+- Nome: min 3 caracteres
+- Email: formato valido
+- Senha atual: obrigatoria
+- Nova senha: min 8 caracteres, diferente da atual (validado no Service)
+- Confirmacao: deve ser igual a nova senha (`.refine()` no schema)
+
+## Comportamento
+
+- Apos update de perfil, `TokenStorage` e `AuthContext` sao atualizados via `updateUser()`
+- Formulario de senha limpa apos sucesso
+- Toast de sucesso/erro via Sonner
+
+Para detalhes completos, consulte `docs/profile-module.md`.

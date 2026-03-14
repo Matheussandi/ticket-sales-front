@@ -1,0 +1,62 @@
+---
+description: Padroes de hooks customizados com TanStack Query
+globs: **/hooks/**
+alwaysApply: false
+---
+
+# Hooks
+
+## Estrutura
+
+```
+src/hooks/
+├── queries/       # useQuery hooks (leitura)
+├── mutations/     # useMutation hooks (escrita)
+└── useDebounce.ts # Hook utilitario
+```
+
+## Query hooks (`hooks/queries/`)
+
+```typescript
+import { useQuery } from "@tanstack/react-query";
+import { myService } from "@/data/di/container";
+
+export function useMyList(filters?: MyFilters) {
+  return useQuery({
+    queryKey: ["my-entity", filters],
+    queryFn: () => myService.getAll(filters),
+  });
+}
+```
+
+- `queryKey` deve ser unica e incluir parametros que afetam o resultado
+- Importe services do container DI, nunca instancie diretamente
+
+## Mutation hooks (`hooks/mutations/`)
+
+```typescript
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { myService } from "@/data/di/container";
+
+export function useCreateMyEntity() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: CreatePayload) => myService.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["my-entity"] });
+    },
+  });
+}
+```
+
+- Invalide queries relacionadas no `onSuccess`
+- Nao coloque logica de UI (toast, navigate) dentro do hook; faca no componente
+
+## useDebounce
+
+```typescript
+const debouncedValue = useDebounce(inputValue, 500);
+```
+
+Use para filtros de busca, evitando chamadas excessivas a API.

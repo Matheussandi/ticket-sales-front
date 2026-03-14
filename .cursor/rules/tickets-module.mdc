@@ -1,0 +1,42 @@
+---
+description: Modulo de tickets e compras
+globs: 
+  - **/tickets/**
+  - **/purchases/**
+alwaysApply: false
+---
+
+# Modulo de Tickets e Compras
+
+## Entidades
+
+- `Ticket`: id, location, event_id, price (string decimal), status (available | sold | reserved)
+- `Purchase`: id, customer_id, purchase_date, total_amount (string decimal), status (paid | pending | cancelled)
+
+## Arquivos principais
+
+- Entities: `src/domain/entities/Ticket.ts`, `src/domain/entities/Purchase.ts`
+- Repositories: `ITicketRepository`, `IPurchaseRepository` + implementacoes em `data/repositories/`
+- Services: `TicketService`, `PurchaseService`
+- Hooks: `useCreateTickets`, `usePurchaseTickets`, `useTicketsByEvent`, `useMyPurchases`
+- UI: `PurchaseTicketDialog`, `src/routes/_authenticated/tickets.tsx`
+
+## Endpoints
+
+- `POST /events/:eventId/tickets` - Criar tickets (partner)
+- `GET /events/:eventId/tickets` - Listar tickets de um evento
+- `POST /purchases` - Comprar tickets (customer, envia ticket_ids + card_token)
+- `GET /purchases` - Listar compras do customer
+
+## Cache keys
+
+- `["events", eventId, "tickets"]` - tickets de um evento
+- `["events", eventId, "tickets", "available-count"]` - contagem disponivel
+- `["my-purchases"]` - compras do customer
+
+## Diferenca por role
+
+- Partner: cria eventos com tickets (num_tickets + price no form)
+- Customer: ve ingressos disponiveis, compra via dialog, acessa "Meus Ingressos"
+
+Para detalhes completos, consulte `docs/tickets-module.md`.

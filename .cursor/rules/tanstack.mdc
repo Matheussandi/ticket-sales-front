@@ -1,0 +1,54 @@
+---
+description: Convencoes TanStack Router e TanStack Query
+globs: **/routes/**
+alwaysApply: false
+---
+
+# TanStack Router + Query
+
+## Router (file-based)
+
+Rotas sao arquivos em `src/routes/`. O `routeTree.gen.ts` e gerado automaticamente.
+
+```tsx
+import { createFileRoute } from "@tanstack/react-router";
+
+export const Route = createFileRoute("/path")({
+  component: MyComponent,
+});
+```
+
+### Rotas protegidas
+
+Layout `_authenticated` com `beforeLoad` que verifica token:
+
+```tsx
+export const Route = createFileRoute("/_authenticated")({
+  beforeLoad: async ({ location }) => {
+    const token = localStorage.getItem("@tickethub:token");
+    if (!token) {
+      throw redirect({ to: "/login", search: { redirect: location.href } });
+    }
+  },
+  component: AuthenticatedLayout,
+});
+```
+
+Rotas filhas ficam em `src/routes/_authenticated/` (ex: `dashboard.tsx`, `events/index.tsx`, `profile.tsx`, `tickets.tsx`).
+
+### Parametros dinamicos
+
+Use `$param` no nome do arquivo: `events/$eventId.tsx`
+
+### Navegacao
+
+- `<Link to="/path">` para links
+- `useNavigate()` para navegacao programatica
+- `useMatchRoute()` para destacar rota ativa na sidebar
+
+## TanStack Query
+
+- Queries em `src/hooks/queries/` com `useQuery`
+- Mutations em `src/hooks/mutations/` com `useMutation`
+- QueryClient configurado em `src/integrations/tanstack-query/root-provider.tsx`
+- Invalide cache apos mutations com `queryClient.invalidateQueries()`

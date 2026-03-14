@@ -1,0 +1,20 @@
+---
+description: Diretrizes de Clean Architecture do projeto TicketHub
+alwaysApply: true
+---
+
+# Arquitetura
+
+O projeto segue Clean Architecture. Dependencias apontam sempre para dentro (dominio).
+
+## Diretrizes
+
+- Nunca faca chamadas HTTP fora de repositories
+- Nunca acesse localStorage diretamente (use TokenStorage)
+- Services devem depender de interfaces (prefixo `I`), nao de implementacoes (sufixo `Impl`)
+- Use path alias `@/` para todos os imports
+- Registre novas dependencias em `src/data/di/container.ts`
+- Schemas Zod ficam em `domain/entities/`, nunca em componentes
+
+Para estrutura de pastas e checklists, consulte `docs/folder-structure.md`.
+Para fluxo de dados, camadas e guia de nova feature, consulte `docs/clean-architecture.md`.
