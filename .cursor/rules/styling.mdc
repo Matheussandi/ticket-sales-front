@@ -1,0 +1,34 @@
+---
+description: Tailwind CSS 4, variaveis CSS e dark mode
+globs: **/*.css
+alwaysApply: false
+---
+
+# Estilizacao
+
+## Stack
+
+- Tailwind CSS 4 (via `@tailwindcss/vite`)
+- shadcn/ui (Radix UI + Tailwind)
+- tw-animate-css para animacoes
+- next-themes para dark mode
+
+## CSS (`src/styles.css`)
+
+```css
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@custom-variant dark (&:is(.dark *));
+```
+
+- Variaveis em `:root` (light) e `.dark` (dark) usando OKLCH
+- `@theme inline` mapeia CSS vars para tokens Tailwind (`--color-*`, `--radius-*`)
+- Base color: zinc
+
+## Convencoes
+
+- Use `cn()` de `@/lib/utils` para classes condicionais
+- Use tokens semanticos do shadcn: `bg-background`, `text-foreground`, `bg-primary`, `text-muted-foreground`, `border-border`, `text-destructive`
+- Nunca use cores hardcoded; use as CSS variables do tema
+- Componentes shadcn/ui usam `class-variance-authority` (cva) para variantes
+- Dark mode e controlado por classe `.dark` no HTML

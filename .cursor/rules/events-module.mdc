@@ -1,0 +1,30 @@
+---
+description: Modulo de eventos - entidades, fluxos e componentes
+globs: **/events/**
+alwaysApply: false
+---
+
+# Modulo de Eventos
+
+## Arquivos principais
+
+- Entity: `src/domain/entities/Event.ts` (eventSchema, createEventSchema, eventFiltersSchema)
+- Repository: `src/domain/repositories/IEventRepository.ts` / `src/data/repositories/EventRepositoryImpl.ts`
+- Service: `src/domain/services/EventService.ts` (getAllEvents, searchEvents, createEvent)
+- Hooks: `src/hooks/queries/useEventList.ts`, `src/hooks/mutations/useCreateEvent.ts`
+- UI: `src/routes/_authenticated/events/index.tsx`, `src/components/events/CreateEventDialog.tsx`
+
+## Endpoints
+
+- `GET /events?name=X&date=Y&location=Z` - Listagem com filtros
+- `POST /events` - Criacao (apenas partners)
+
+## Padroes do modulo
+
+- Filtros de busca usam `useDebounce(value, 500)` para nome e localizacao
+- Tabela com badge de status: "Proximo" (futuro) ou "Realizado" (passado)
+- `CreateEventDialog` usa React Hook Form + Zod, com campos opcionais de tickets
+- Cache invalidado apos criacao via `queryClient.invalidateQueries({ queryKey: ["events"] })`
+- Visao diferente por role: partners veem "Criar Evento" e "Criado em"; customers veem "Ingressos" e "Comprar"
+
+Para detalhes completos, consulte `docs/events-module.md`.

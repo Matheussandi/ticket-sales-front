@@ -1,0 +1,55 @@
+---
+description: Padroes de componentes React e shadcn/ui
+globs: **/*.tsx
+alwaysApply: false
+---
+
+# Componentes React
+
+## shadcn/ui
+
+Componentes base ficam em `src/components/ui/`. Para adicionar novos:
+
+```bash
+pnpm dlx shadcn@latest add <component>
+```
+
+Configuracao: estilo `new-york`, baseColor `zinc`, Tailwind 4, CSS variables.
+
+## Padroes
+
+- Use `cn()` de `@/lib/utils` para classes condicionais (clsx + tailwind-merge)
+- Use componentes funcionais com TypeScript
+- Extraia logica reutilizavel em hooks customizados
+- Use `useId()` do React para gerar IDs unicos em formularios (acessibilidade)
+- Notificacoes via `toast` do Sonner
+
+## Estrutura de componentes
+
+```
+src/components/
+├── ui/              # shadcn/ui (nao editar manualmente)
+├── events/          # Componentes do modulo de eventos
+├── AppSidebar.tsx   # Sidebar de navegacao
+└── Header.tsx       # Header publico
+```
+
+## Exemplos
+
+```tsx
+// Classe condicional com cn()
+<div className={cn("base-class", isActive && "active-class")} />
+
+// Campos obrigatorios com asterisco vermelho
+<Label htmlFor={id}>
+  Nome <span className="text-destructive">*</span>
+</Label>
+
+// Loading states
+<Button disabled={isPending}>
+  {isPending ? "Salvando..." : "Salvar"}
+</Button>
+
+// Skeleton para listas
+{isLoading && [...Array(5)].map((_, i) => <Skeleton key={i} />)}
+```
