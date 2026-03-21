@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { Calendar, DollarSign, Ticket, TrendingUp } from "lucide-react";
+import { Calendar } from "lucide-react";
 import {
 	Card,
 	CardContent,
@@ -35,20 +35,6 @@ function DashboardPage() {
 		queryFn: () => eventService.getAllEvents(),
 	});
 
-	const stats = {
-		totalEvents: events?.length ?? 0,
-		eventsThisMonth: events?.filter((event) => {
-			const eventDate = new Date(event.date);
-			const now = new Date();
-			return (
-				eventDate.getMonth() === now.getMonth() &&
-				eventDate.getFullYear() === now.getFullYear()
-			);
-		}).length ?? 0,
-		ticketsSold: 1250,
-		revenue: 45780,
-	};
-
 	// Últimos 5 eventos
 	const recentEvents = events?.slice(0, 5) ?? [];
 
@@ -62,7 +48,7 @@ function DashboardPage() {
 				</p>
 			</div>
 
-			{/* Stats Cards */}
+			{/* Stats Cards — funcionalidade futura
 			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -120,6 +106,7 @@ function DashboardPage() {
 					</CardContent>
 				</Card>
 			</div>
+			*/}
 
 			{/* Recent Events Table */}
 			<Card>

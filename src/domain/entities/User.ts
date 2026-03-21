@@ -118,7 +118,7 @@ export const updateProfileSchema = z.object({
 		.string()
 		.min(1, "Email é obrigatório")
 		.email("Email inválido"),
-	phone: z.string().optional(),
+	phone: z.string().min(1, "Telefone é obrigatório"),
 });
 
 // Schema para atualização de senha

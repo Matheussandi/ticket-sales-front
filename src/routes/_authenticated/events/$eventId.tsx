@@ -16,7 +16,6 @@ import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
-	CardDescription,
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
@@ -72,7 +71,7 @@ function EventDetailPage() {
 			<div className="flex flex-col items-center justify-center py-16 text-center space-y-4">
 				<p className="text-destructive text-lg">Evento não encontrado.</p>
 				<Button variant="outline" asChild>
-					<Link to="/events/">← Voltar para Eventos</Link>
+					<Link to="/events">← Voltar para Eventos</Link>
 				</Button>
 			</div>
 		);
@@ -88,7 +87,7 @@ function EventDetailPage() {
 			{/* Breadcrumb / volta */}
 			<div>
 				<Button variant="ghost" size="sm" asChild>
-					<Link to="/events/">
+					<Link to="/events">
 						<ArrowLeft className="mr-2 h-4 w-4" />
 						Voltar para Eventos
 					</Link>
@@ -105,32 +104,20 @@ function EventDetailPage() {
 				</div>
 
 				{isCustomer && (
-					<div className="flex items-center gap-2">
-						{selectedTickets.length > 0 && (
-							<Button
-								size="lg"
-								variant="outline"
-								onClick={() => setIsSeatOpen(true)}
-							>
-								<ShoppingCart className="mr-2 h-5 w-5" />
-								Editar Poltronas
-							</Button>
-						)}
-						<Button
-							size="lg"
-							disabled={!canBuy}
-							onClick={() => setIsSeatOpen(true)}
-						>
-							<ShoppingCart className="mr-2 h-5 w-5" />
-							{!isUpcoming
-								? "Evento encerrado"
-								: (availableCount ?? 0) === 0 && !loadingTickets
-									? "Esgotado"
-									: selectedTickets.length > 0
-										? "Alterar Seleção"
-										: "Selecionar Poltronas"}
-						</Button>
-					</div>
+					<Button
+						size="lg"
+						disabled={!canBuy}
+						onClick={() => setIsSeatOpen(true)}
+					>
+						<ShoppingCart className="mr-2 h-5 w-5" />
+						{!isUpcoming
+							? "Evento encerrado"
+							: (availableCount ?? 0) === 0 && !loadingTickets
+								? "Esgotado"
+								: selectedTickets.length > 0
+									? "Alterar Seleção"
+									: "Selecionar Poltronas"}
+					</Button>
 				)}
 			</div>
 
@@ -165,56 +152,6 @@ function EventDetailPage() {
 								<span>{event.location}</span>
 							</div>
 						</div>
-					</CardContent>
-				</Card>
-
-				{/* Card de ingressos */}
-				<Card>
-					<CardHeader>
-						<CardTitle>Ingressos</CardTitle>
-						<CardDescription>Disponibilidade e preços</CardDescription>
-					</CardHeader>
-					<CardContent className="space-y-4">
-						{loadingTickets ? (
-							<Skeleton className="h-16 w-full" />
-						) : (
-							<>
-								<div className="flex items-center justify-between">
-									<div className="flex items-center gap-2 text-sm text-muted-foreground">
-										<Ticket className="h-4 w-4" />
-										<span>Disponíveis</span>
-									</div>
-									<Badge
-										variant={
-											(availableCount ?? 0) > 0 ? "default" : "destructive"
-										}
-									>
-										{availableCount ?? 0}
-									</Badge>
-								</div>
-
-								{isCustomer && isUpcoming && (availableCount ?? 0) > 0 && (
-									<Button
-										className="w-full"
-										onClick={() => setIsSeatOpen(true)}
-									>
-										Selecionar Poltronas
-									</Button>
-								)}
-
-								{!isUpcoming && (
-									<p className="text-xs text-muted-foreground text-center">
-										As vendas para este evento foram encerradas.
-									</p>
-								)}
-
-								{isUpcoming && (availableCount ?? 0) === 0 && !loadingTickets && (
-									<p className="text-xs text-destructive text-center">
-										Ingressos esgotados.
-									</p>
-								)}
-							</>
-						)}
 					</CardContent>
 				</Card>
 			</div>
