@@ -8,9 +8,15 @@
 
 ## Sobre o Projeto
 
-**TicketHub** é uma plataforma moderna de venda de ingressos online desenvolvida com **React**, **TypeScript** e **Clean Architecture**. O projeto oferece uma experiência rápida, segura e intuitiva para compra de ingressos para shows, festivais, teatros e eventos esportivos.
+**TicketHub** é uma plataforma moderna de venda de ingressos online, desenvolvida com **React**, **TypeScript** e **Clean Architecture**. O projeto busca uma experiência rápida, segura e intuitiva na compra de ingressos, com **foco inicial em sessões de cinema**.
 
-> Frontend desenvolvido como parte de um estudo prático de arquitetura limpa com o ecossistema TanStack.
+## 🎬 Apresentação
+
+### Criar evento
+https://github.com/user-attachments/assets/2c8ae12a-deda-41e8-93f3-3f53bd8ed598
+
+### Comprar bilhete
+https://github.com/user-attachments/assets/c6da9fca-c827-4646-9b81-7d668a4ba3e1
 
 ## 🏗️ Arquitetura
 

@@ -118,7 +118,10 @@ function ProfilePage() {
 								name="name"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Nome</FormLabel>
+										<FormLabel>
+											Nome{" "}
+											<span className="text-destructive">*</span>
+										</FormLabel>
 										<FormControl>
 											<Input placeholder="Seu nome completo" {...field} />
 										</FormControl>
@@ -132,7 +135,10 @@ function ProfilePage() {
 								name="email"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Email</FormLabel>
+										<FormLabel>
+											Email{" "}
+											<span className="text-destructive">*</span>
+										</FormLabel>
 										<FormControl>
 											<Input
 												type="email"
@@ -149,7 +155,10 @@ function ProfilePage() {
 							name="phone"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Telefone</FormLabel>
+									<FormLabel>
+										Telefone{" "}
+										<span className="text-destructive">*</span>
+									</FormLabel>
 									<FormControl>
 										<Input
 											type="tel"
@@ -201,7 +210,10 @@ function ProfilePage() {
 								name="currentPassword"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Senha Atual</FormLabel>
+										<FormLabel>
+											Senha Atual{" "}
+											<span className="text-destructive">*</span>
+										</FormLabel>
 										<FormControl>
 											<Input
 												type="password"
@@ -219,11 +231,14 @@ function ProfilePage() {
 								name="newPassword"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Nova Senha</FormLabel>
+										<FormLabel>
+											Nova Senha{" "}
+											<span className="text-destructive">*</span>
+										</FormLabel>
 										<FormControl>
 											<Input
 												type="password"
-												placeholder="Mínimo 6 caracteres"
+												placeholder="Mínimo 8 caracteres"
 												{...field}
 											/>
 										</FormControl>
@@ -237,7 +252,10 @@ function ProfilePage() {
 								name="confirmPassword"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Confirmar Nova Senha</FormLabel>
+										<FormLabel>
+											Confirmar Nova Senha{" "}
+											<span className="text-destructive">*</span>
+										</FormLabel>
 										<FormControl>
 											<Input
 												type="password"
