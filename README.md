@@ -12,6 +12,14 @@
 
 > Frontend desenvolvido como parte de um estudo prático de arquitetura limpa com o ecossistema TanStack.
 
+## 🎬 Apresentação
+
+### Criar evento
+https://github.com/user-attachments/assets/2c8ae12a-deda-41e8-93f3-3f53bd8ed598
+
+### Comprar bilhete
+https://github.com/user-attachments/assets/c6da9fca-c827-4646-9b81-7d668a4ba3e1
+
 ## 🏗️ Arquitetura
 
 O projeto segue os princípios da **Clean Architecture**, separando responsabilidades em camadas bem definidas:
