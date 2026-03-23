@@ -29,7 +29,7 @@ alwaysApply: false
 
 ## Comportamento
 
-- Apos update de perfil, `TokenStorage` e `AuthContext` sao atualizados via `updateUser()`
+- Apos update de perfil, o `AuthContext` é atualizado via `updateUser()` no `onSuccess` de `useUpdateProfile`
 - Formulario de senha limpa apos sucesso
 - Toast de sucesso/erro via Sonner
 

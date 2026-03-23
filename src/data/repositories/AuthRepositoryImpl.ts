@@ -1,19 +1,45 @@
-import type {
-	AuthResponse,
-	LoginCredentials,
-	RegisterCustomerData,
-	RegisterData,
-	RegisterPartnerData,
-	UpdatePasswordData,
-	UpdateProfileData,
-	User,
+import { z } from "zod";
+
+import {
+	type AuthResponse,
+	authLoginFlatResponseSchema,
+	authLoginResponseSchema,
+	authMeResponseSchema,
+	type LoginCredentials,
+	type RegisterCustomerData,
+	type RegisterData,
+	type RegisterPartnerData,
+	type UpdatePasswordData,
+	type UpdateProfileData,
+	type User,
+	userSchema,
 } from "../../domain/entities/User";
 
 import type { IAuthRepository } from "../../domain/repositories/IAuthRepository";
-import { decodeJwtToken } from "../../domain/utils/jwtDecoder";
 import type { HttpClient } from "../http/HttpClient";
 
-import type { TokenStorage } from "../storage/TokenStorage";
+import type { UserStorage } from "../storage/UserStorage";
+
+function userFromFlat(data: z.infer<typeof authLoginFlatResponseSchema>): User {
+	return {
+		id: typeof data.id === "number" ? data.id : Number(data.id),
+		name: data.name,
+		email: data.email,
+		role: data.role,
+	};
+}
+
+function parseUserFromLoginBody(raw: unknown): User | null {
+	const wrapped = authLoginResponseSchema.safeParse(raw);
+	if (wrapped.success) {
+		return wrapped.data.user;
+	}
+	const flat = authLoginFlatResponseSchema.safeParse(raw);
+	if (flat.success) {
+		return userFromFlat(flat.data);
+	}
+	return null;
+}
 
 /**
  * Auth Repository Implementation
@@ -24,50 +50,51 @@ import type { TokenStorage } from "../storage/TokenStorage";
 export class AuthRepositoryImpl implements IAuthRepository {
 	constructor(
 		private readonly httpClient: HttpClient,
-		private readonly tokenStorage: TokenStorage,
+		private readonly userStorage: UserStorage,
 	) {}
 
+	/**
+	 * GET /auth/me — cookie de sessão (withCredentials no HttpClient).
+	 * 200 + { user } = autenticado; 401 = sem sessão (sem redirect global).
+	 */
+	private async fetchMeUser(): Promise<User | null> {
+		try {
+			const raw = await this.httpClient.get<unknown>("/auth/me", {
+				skipUnauthorizedRedirect: true,
+			});
+			const parsed = authMeResponseSchema.safeParse(raw);
+			return parsed.success ? parsed.data.user : null;
+		} catch {
+			return null;
+		}
+	}
+
 	async login(credentials: LoginCredentials): Promise<AuthResponse> {
-		const response = await this.httpClient.post<AuthResponse>(
-			"/auth/login",
-			credentials,
-		);
+		const raw = await this.httpClient.post<unknown>("/auth/login", credentials);
 
-		const payload = decodeJwtToken(response.token);
+		let user = parseUserFromLoginBody(raw);
+		if (!user) {
+			user = await this.fetchMeUser();
+		}
+		if (!user) {
+			throw new Error("Resposta de login inválida");
+		}
 
-		const user: User = {
-			id: payload.id.toString(),
-			name: payload.name,
-			email: payload.email,
-			role: payload.role,
-		};
-
-		this.tokenStorage.saveToken(response.token);
-		this.tokenStorage.saveUser(user);
-		this.httpClient.setToken(response.token);
-
-		return { token: response.token, user };
+		return { user };
 	}
 
 	async register(data: RegisterData): Promise<AuthResponse> {
-		const response = await this.httpClient.post<AuthResponse>(
-			"/auth/register",
-			data,
-		);
+		const raw = await this.httpClient.post<unknown>("/auth/register", data);
 
-		const payload = decodeJwtToken(response.token);
-		const user: User = {
-			id: payload.id.toString(),
-			name: payload.name,
-			email: payload.email,
-			role: payload.role,
-		};
+		let user = parseUserFromLoginBody(raw);
+		if (!user) {
+			user = await this.fetchMeUser();
+		}
+		if (!user) {
+			throw new Error("Resposta de registro inválida");
+		}
 
-		this.tokenStorage.saveToken(response.token);
-		this.tokenStorage.saveUser(user);
-		this.httpClient.setToken(response.token);
-
-		return { token: response.token, user };
+		return { user };
 	}
 
 	async registerPartner(data: RegisterPartnerData): Promise<AuthResponse> {
@@ -85,7 +112,7 @@ export class AuthRepositoryImpl implements IAuthRepository {
 		);
 
 		const user: User = {
-			id: response.user_id.toString(),
+			id: response.user_id,
 			name: response.name,
 			email: data.email,
 			role: "partner",
@@ -93,14 +120,7 @@ export class AuthRepositoryImpl implements IAuthRepository {
 			createdAt: new Date(response.created_at),
 		};
 
-		const authResponse: AuthResponse = {
-			user,
-			token: "",
-		};
-
-		this.tokenStorage.saveUser(user);
-
-		return authResponse;
+		return { user };
 	}
 
 	async registerCustomer(data: RegisterCustomerData): Promise<AuthResponse> {
@@ -119,7 +139,7 @@ export class AuthRepositoryImpl implements IAuthRepository {
 		);
 
 		const user: User = {
-			id: response.user_id.toString(),
+			id: response.user_id,
 			name: response.name,
 			email: data.email,
 			role: "customer",
@@ -128,49 +148,32 @@ export class AuthRepositoryImpl implements IAuthRepository {
 			createdAt: new Date(response.created_at),
 		};
 
-		const authResponse: AuthResponse = {
-			user,
-			token: "",
-		};
-
-		this.tokenStorage.saveUser(user);
-
-		return authResponse;
+		return { user };
 	}
 
 	async logout(): Promise<void> {
 		try {
 			await this.httpClient.post("/auth/logout");
 		} finally {
-			this.tokenStorage.clear();
-			this.httpClient.clearToken();
+			this.userStorage.clear();
 		}
 	}
 
-	async validateToken(): Promise<boolean> {
-		try {
-			const token = this.tokenStorage.getToken();
-			if (!token) return false;
-
-			await this.httpClient.get("/auth/validate");
-			return true;
-		} catch {
-			this.tokenStorage.clear();
-			return false;
+	async validateSession(): Promise<User | null> {
+		const user = await this.fetchMeUser();
+		if (!user) {
+			this.userStorage.clear();
 		}
+		return user;
 	}
 
 	async updateProfile(data: UpdateProfileData): Promise<User> {
-		const response = await this.httpClient.put<User>("/profile", data);
-
-		const currentUser = this.tokenStorage.getUser<User>();
-		const updatedUser: User = {
-			...(currentUser || {}),
-			...response,
-		} as User;
-
-		this.tokenStorage.saveUser(updatedUser);
-		return updatedUser;
+		const response = await this.httpClient.put<unknown>("/profile", data);
+		const parsed = userSchema.safeParse(response);
+		if (!parsed.success) {
+			throw new Error("Resposta de atualização de perfil inválida");
+		}
+		return parsed.data;
 	}
 
 	async updatePassword(data: UpdatePasswordData): Promise<void> {

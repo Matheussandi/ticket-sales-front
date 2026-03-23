@@ -3,7 +3,7 @@ import { z } from "zod";
 export const userRoleEnum = z.enum(["partner", "customer"]);
 
 export const userSchema = z.object({
-	id: z.string(),
+	id: z.coerce.number(),
 	name: z.string(),
 	email: z.string(),
 	role: userRoleEnum.optional(),
@@ -67,9 +67,27 @@ export const registerCustomerRequestSchema = z.object({
 	phone: z.string().min(1, "Telefone é obrigatório"),
 });
 
+/** Resposta de login/register: cookie httpOnly; token no JSON é opcional (ignorado no cliente). */
+export const authLoginResponseSchema = z.object({
+	user: userSchema,
+	token: z.string().optional(),
+});
+
+/** Formato alternativo: usuário “flat” no corpo da resposta. */
+export const authLoginFlatResponseSchema = z.object({
+	id: z.union([z.string(), z.number()]),
+	name: z.string(),
+	email: z.string(),
+	role: userRoleEnum,
+});
+
 export const authResponseSchema = z.object({
 	user: userSchema,
-	token: z.string(),
+});
+
+/** GET /auth/me — sessão válida (200). */
+export const authMeResponseSchema = z.object({
+	user: userSchema,
 });
 
 export const loginSchema = loginRequestSchema;
@@ -102,10 +120,7 @@ export const registerCustomerSchema = registerCustomerRequestSchema
 	});
 
 export const forgotPasswordSchema = z.object({
-	email: z
-		.string()
-		.min(1, "Email é obrigatório")
-		
+	email: z.string().min(1, "Email é obrigatório"),
 });
 
 // Schema para atualização de perfil (nome, email e telefone)
@@ -114,35 +129,34 @@ export const updateProfileSchema = z.object({
 		.string()
 		.min(1, "Nome é obrigatório")
 		.min(3, "Nome deve ter no mínimo 3 caracteres"),
-	email: z
-		.string()
-		.min(1, "Email é obrigatório")
-		.email("Email inválido"),
+	email: z.string().min(1, "Email é obrigatório").email("Email inválido"),
 	phone: z.string().min(1, "Telefone é obrigatório"),
 });
 
 // Schema para atualização de senha
-export const updatePasswordSchema = z.object({
-	currentPassword: z
-		.string()
-		.min(1, "Senha atual é obrigatória"),
-	newPassword: z
-		.string()
-		.min(1, "Nova senha é obrigatória")
-		.min(8, "Nova senha deve ter no mínimo 8 caracteres"),
-	confirmPassword: z
-		.string()
-		.min(1, "Confirmação de senha é obrigatória"),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-	message: "As senhas não coincidem",
-	path: ["confirmPassword"],
-});
+export const updatePasswordSchema = z
+	.object({
+		currentPassword: z.string().min(1, "Senha atual é obrigatória"),
+		newPassword: z
+			.string()
+			.min(1, "Nova senha é obrigatória")
+			.min(8, "Nova senha deve ter no mínimo 8 caracteres"),
+		confirmPassword: z.string().min(1, "Confirmação de senha é obrigatória"),
+	})
+	.refine((data) => data.newPassword === data.confirmPassword, {
+		message: "As senhas não coincidem",
+		path: ["confirmPassword"],
+	});
 
 export type User = z.infer<typeof userSchema>;
 export type LoginRequest = z.infer<typeof loginRequestSchema>;
 export type RegisterRequest = z.infer<typeof registerRequestSchema>;
-export type RegisterPartnerRequest = z.infer<typeof registerPartnerRequestSchema>;
-export type RegisterCustomerRequest = z.infer<typeof registerCustomerRequestSchema>;
+export type RegisterPartnerRequest = z.infer<
+	typeof registerPartnerRequestSchema
+>;
+export type RegisterCustomerRequest = z.infer<
+	typeof registerCustomerRequestSchema
+>;
 export type AuthResponse = z.infer<typeof authResponseSchema>;
 export type LoginFormData = z.infer<typeof loginSchema>;
 export type RegisterFormData = z.infer<typeof registerSchema>;

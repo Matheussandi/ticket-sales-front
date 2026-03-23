@@ -10,8 +10,8 @@ alwaysApply: false
 
 Wrapper Axios com:
 - Base URL e timeout de `src/config/env.ts`
-- Interceptor request: adiciona `Authorization: Bearer <token>`
-- Interceptor response: trata 401 (remove token, redireciona login)
+- `withCredentials: true` (cookies httpOnly em requisições cross-origin)
+- Interceptor response: 401 chama callback `onUnauthorized` (limpa `UserStorage`, redireciona login), exceto quando `skipUnauthorizedRedirect: true` na config (ex.: `GET /auth/me` ao validar sessão)
 
 ## Repositories
 
@@ -28,7 +28,7 @@ export class EventRepositoryImpl implements IEventRepository {
 ```
 
 - Valide responses com schemas Zod quando necessario
-- Use `TokenStorage` para persistir tokens (nunca localStorage direto)
+- Use `UserStorage` para persistir snapshot do usuario (nunca localStorage direto; sem JWT no cliente)
 - Trate transformacoes de dados (DTOs) aqui
 
 ## DI Container (`src/data/di/container.ts`)
@@ -36,8 +36,13 @@ export class EventRepositoryImpl implements IEventRepository {
 Singleton: cria instancias na ordem `infrastructure → repositories → services`.
 
 ```typescript
-const httpClient = new HttpClient();
-const tokenStorage = new TokenStorage();
+const userStorage = new UserStorage();
+const httpClient = new HttpClient({
+  onUnauthorized: () => {
+    userStorage.clear();
+    if (typeof window !== "undefined") window.location.href = "/login";
+  },
+});
 const myRepository = new MyRepositoryImpl(httpClient);
 export const myService = new MyService(myRepository);
 ```

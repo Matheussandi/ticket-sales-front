@@ -3,10 +3,7 @@ import {
 	type ReactNode,
 	useContext,
 	useEffect,
-	useState,
 } from "react";
-
-import { tokenStorage } from "../data/di/container";
 
 import type {
 	LoginCredentials,
@@ -17,6 +14,8 @@ import type {
 } from "../domain/entities/User";
 
 import type { AuthService } from "../domain/services/AuthService";
+
+import { useAuthBootstrap } from "@/hooks/useAuthBootstrap";
 
 interface AuthContextData {
 	user: User | null;
@@ -38,33 +37,8 @@ interface AuthProviderProps {
 const AuthContext = createContext<AuthContextData | undefined>(undefined);
 
 export function AuthProvider({ children, authService }: AuthProviderProps) {
-	const [user, setUser] = useState<User | null>(null);
-	const [isLoading, setIsLoading] = useState(true);
-
-	useEffect(() => {
-		const initAuth = async () => {
-			try {
-				const storedUser = tokenStorage.getUser<User>();
-				const hasToken = tokenStorage.hasToken();
-
-				if (storedUser && hasToken) {
-					const isValid = await authService.validateToken();
-					if (isValid) {
-						setUser(storedUser);
-					} else {
-						tokenStorage.clear();
-					}
-				}
-			} catch (error) {
-				console.error("Erro ao validar sessão:", error);
-				tokenStorage.clear();
-			} finally {
-				setIsLoading(false);
-			}
-		};
-
-		initAuth();
-	}, [authService]);
+	const { user, setUser, isLoading, setIsLoading } =
+		useAuthBootstrap(authService);
 
 	const login = async (credentials: LoginCredentials): Promise<User> => {
 		setIsLoading(true);
@@ -91,8 +65,10 @@ export function AuthProvider({ children, authService }: AuthProviderProps) {
 		setIsLoading(true);
 		try {
 			const response = await authService.registerPartner(data);
-			if (response.token) {
-				setUser(response.user);
+			setUser(response.user);
+			const sessionUser = await authService.validateSession();
+			if (sessionUser) {
+				setUser(sessionUser);
 			} else {
 				await login({ email: data.email, password: data.password });
 			}
@@ -107,8 +83,10 @@ export function AuthProvider({ children, authService }: AuthProviderProps) {
 		setIsLoading(true);
 		try {
 			const response = await authService.registerCustomer(data);
-			if (response.token) {
-				setUser(response.user);
+			setUser(response.user);
+			const sessionUser = await authService.validateSession();
+			if (sessionUser) {
+				setUser(sessionUser);
 			} else {
 				await login({ email: data.email, password: data.password });
 			}

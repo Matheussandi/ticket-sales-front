@@ -14,12 +14,20 @@ import { AuthRepositoryImpl } from "../repositories/AuthRepositoryImpl";
 import { EventRepositoryImpl } from "../repositories/EventRepositoryImpl";
 import { PurchaseRepositoryImpl } from "../repositories/PurchaseRepositoryImpl";
 import { TicketRepositoryImpl } from "../repositories/TicketRepositoryImpl";
-import { TokenStorage } from "../storage/TokenStorage";
+import { UserStorage } from "../storage/UserStorage";
 
-const httpClient = new HttpClient();
-const tokenStorage = new TokenStorage();
+const userStorage = new UserStorage();
 
-const authRepository = new AuthRepositoryImpl(httpClient, tokenStorage);
+const httpClient = new HttpClient({
+	onUnauthorized: () => {
+		userStorage.clear();
+		if (typeof window !== "undefined") {
+			window.location.href = "/login";
+		}
+	},
+});
+
+const authRepository = new AuthRepositoryImpl(httpClient, userStorage);
 const eventRepository = new EventRepositoryImpl(httpClient);
 const ticketRepository = new TicketRepositoryImpl(httpClient);
 const purchaseRepository = new PurchaseRepositoryImpl(httpClient);
@@ -29,4 +37,4 @@ export const eventService = new EventService(eventRepository);
 export const ticketService = new TicketService(ticketRepository);
 export const purchaseService = new PurchaseService(purchaseRepository);
 
-export { httpClient, tokenStorage };
+export { httpClient, userStorage };

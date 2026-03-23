@@ -1,12 +1,12 @@
-import type { 
-	AuthResponse, 
-	LoginCredentials, 
-	RegisterCustomerData, 
+import type {
+	AuthResponse,
+	LoginCredentials,
+	RegisterCustomerData,
 	RegisterData,
 	RegisterPartnerData,
 	UpdatePasswordData,
 	UpdateProfileData,
-	User
+	User,
 } from "../entities/User";
 
 /**
@@ -21,7 +21,7 @@ export interface IAuthRepository {
 	registerPartner(data: RegisterPartnerData): Promise<AuthResponse>;
 	registerCustomer(data: RegisterCustomerData): Promise<AuthResponse>;
 	logout(): Promise<void>;
-	validateToken(): Promise<boolean>;
+	validateSession(): Promise<User | null>;
 	updateProfile(data: UpdateProfileData): Promise<User>;
 	updatePassword(data: UpdatePasswordData): Promise<void>;
 }
