@@ -20,19 +20,7 @@ export const Route = createFileRoute("/path")({
 
 ### Rotas protegidas
 
-Layout `_authenticated` com `beforeLoad` que verifica token:
-
-```tsx
-export const Route = createFileRoute("/_authenticated")({
-  beforeLoad: async ({ location }) => {
-    const token = localStorage.getItem("@tickethub:token");
-    if (!token) {
-      throw redirect({ to: "/login", search: { redirect: location.href } });
-    }
-  },
-  component: AuthenticatedLayout,
-});
-```
+Layout `_authenticated`: **sem** `beforeLoad` que chama a API (no SSR nao ha cookie repassado ao axios). Sessao via `GET /auth/me` no **AuthContext** apos hidrata (`hasHydrated`). O layout usa `useAuth()` + `useNavigate()` para enviar nao autenticados ao `/login`.
 
 Rotas filhas ficam em `src/routes/_authenticated/` (ex: `dashboard.tsx`, `events/index.tsx`, `profile.tsx`, `tickets.tsx`).
 

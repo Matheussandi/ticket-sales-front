@@ -10,7 +10,7 @@ O projeto segue Clean Architecture. Dependencias apontam sempre para dentro (dom
 ## Diretrizes
 
 - Nunca faca chamadas HTTP fora de repositories
-- Nunca acesse localStorage diretamente (use TokenStorage)
+- Nunca acesse localStorage diretamente (use UserStorage para snapshot do usuario; sessao via cookie httpOnly)
 - Services devem depender de interfaces (prefixo `I`), nao de implementacoes (sufixo `Impl`)
 - Use path alias `@/` para todos os imports
 - Registre novas dependencias em `src/data/di/container.ts`

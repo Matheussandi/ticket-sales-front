@@ -1,19 +1,32 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig } from "axios";
 import { env } from "../../config/env";
 
+export interface HttpClientOptions {
+	/** Chamado em 401 — ex.: limpar UserStorage e redirecionar (apenas no browser). */
+	onUnauthorized?: () => void;
+}
+
+/** Config estendida: sondagens de sessão não devem disparar redirect global em 401. */
+export type HttpRequestConfig = AxiosRequestConfig & {
+	skipUnauthorizedRedirect?: boolean;
+};
+
 /**
  * HTTP Client
  *
  * Wrapper sobre axios com configurações padrão e interceptors.
- * Gerencia autenticação automática via token JWT.
+ * Autenticação via cookie httpOnly (`withCredentials: true`).
  */
 export class HttpClient {
 	private axiosInstance: AxiosInstance;
+	private readonly onUnauthorized?: () => void;
 
-	constructor() {
+	constructor(options?: HttpClientOptions) {
+		this.onUnauthorized = options?.onUnauthorized;
 		this.axiosInstance = axios.create({
 			baseURL: env.apiBaseUrl,
 			timeout: env.apiTimeout,
+			withCredentials: true,
 			headers: {
 				"Content-Type": "application/json",
 			},
@@ -22,42 +35,24 @@ export class HttpClient {
 		this.setupInterceptors();
 	}
 
-	/**
-	 * Configura interceptors de request e response
-	 */
 	private setupInterceptors(): void {
-		// Request interceptor - adiciona token automaticamente
-		this.axiosInstance.interceptors.request.use(
-			(config) => {
-				const token = this.getStoredToken();
-				if (token) {
-					config.headers.Authorization = `Bearer ${token}`;
-				}
-				return config;
-			},
-			(error) => {
-				return Promise.reject(error);
-			},
-		);
-
-		// Response interceptor - trata erros globalmente
 		this.axiosInstance.interceptors.response.use(
 			(response) => response,
 			async (error) => {
 				if (error.response?.status === 401) {
-					this.clearStoredToken();
-					localStorage.removeItem("@tickethub:user");
-					window.location.href = '/login';
+					const cfg = error.config as HttpRequestConfig | undefined;
+					if (!cfg?.skipUnauthorizedRedirect) {
+						this.onUnauthorized?.();
+					}
 				}
 
-				// Personaliza mensagens de erro
 				const message = error.response?.data?.message || error.message;
 				return Promise.reject(new Error(message));
 			},
 		);
 	}
 
-	async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
+	async get<T>(url: string, config?: HttpRequestConfig): Promise<T> {
 		const response = await this.axiosInstance.get<T>(url, config);
 		return response.data;
 	}
@@ -65,7 +60,7 @@ export class HttpClient {
 	async post<T>(
 		url: string,
 		data?: unknown,
-		config?: AxiosRequestConfig,
+		config?: HttpRequestConfig,
 	): Promise<T> {
 		const response = await this.axiosInstance.post<T>(url, data, config);
 		return response.data;
@@ -74,13 +69,13 @@ export class HttpClient {
 	async put<T>(
 		url: string,
 		data?: unknown,
-		config?: AxiosRequestConfig,
+		config?: HttpRequestConfig,
 	): Promise<T> {
 		const response = await this.axiosInstance.put<T>(url, data, config);
 		return response.data;
 	}
 
-	async delete<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
+	async delete<T>(url: string, config?: HttpRequestConfig): Promise<T> {
 		const response = await this.axiosInstance.delete<T>(url, config);
 		return response.data;
 	}
@@ -88,25 +83,9 @@ export class HttpClient {
 	async patch<T>(
 		url: string,
 		data?: unknown,
-		config?: AxiosRequestConfig,
+		config?: HttpRequestConfig,
 	): Promise<T> {
 		const response = await this.axiosInstance.patch<T>(url, data, config);
 		return response.data;
-	}
-
-	setToken(token: string): void {
-		localStorage.setItem("@tickethub:token", token);
-	}
-
-	clearToken(): void {
-		this.clearStoredToken();
-	}
-
-	private getStoredToken(): string | null {
-		return localStorage.getItem("@tickethub:token");
-	}
-
-	private clearStoredToken(): void {
-		localStorage.removeItem("@tickethub:token");
 	}
 }

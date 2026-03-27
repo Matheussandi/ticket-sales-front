@@ -1,12 +1,12 @@
-import type { 
-	AuthResponse, 
-	LoginCredentials, 
-	RegisterCustomerData, 
+import type {
+	AuthResponse,
+	LoginCredentials,
+	RegisterCustomerData,
 	RegisterData,
 	RegisterPartnerData,
 	UpdatePasswordData,
 	UpdateProfileData,
-	User
+	User,
 } from "../entities/User";
 import type { IAuthRepository } from "../repositories/IAuthRepository";
 
@@ -73,11 +73,11 @@ export class AuthService {
 		}
 	}
 
-	async validateToken(): Promise<boolean> {
+	async validateSession(): Promise<User | null> {
 		try {
-			return await this.authRepository.validateToken();
+			return await this.authRepository.validateSession();
 		} catch {
-			return false;
+			return null;
 		}
 	}
 
